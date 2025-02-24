@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_home"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- IP Address Input -->
+    <EditText
+        android:id="@+id/input_ip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter IP Address"
+        android:inputType="text"
+        android:padding="10dp" />
+
+    <!-- Port Input -->
+    <EditText
+        android:id="@+id/input_port"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="5683"
+        android:hint="Enter Port"
+        android:inputType="number"
+        android:padding="10dp" />
+
+    <!-- Request Body Input -->
+    <EditText
+        android:id="@+id/input_url_post"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter url"
+        android:inputType="text"
+        android:padding="10dp" />
+
+    <Spinner
+        android:id="@+id/input_choice"
+        android:padding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/input_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:height="100dp"
+        android:hint="Enter Request Body"
+        android:inputType="textMultiLine"
+        android:padding="10dp" />
+
+    <!-- Request Button -->
+    <Button
+        android:id="@+id/btn_send_request"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#007BFF"
+        android:onClick="handleRequest"
+        android:text="Send Request"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/text_result"
+        android:layout_marginTop="32dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"    
+        android:text="nothing"
+        />
+
+<!--    <Button-->
+<!--        android:id="@+id/btn_stop_observing"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:backgroundTint="#007BFF"-->
+<!--        android:onClick="handleStopObserving"-->
+<!--        android:text="Stop observing"-->
+<!--        android:textColor="#FFFFFF"-->
+<!--        android:visibility="gone" />-->
+
+
+</LinearLayout>

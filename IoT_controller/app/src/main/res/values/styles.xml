@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/values/styles.xml -->
+<resources>
+
+
+<style name="title_text" parent="TextAppearance.AppCompat">
+    <item name="android:textSize">30sp</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:textColor">@color/color1</item>
+    <item name="android:gravity">center</item>
+</style>
+</resources>
