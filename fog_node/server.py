@@ -6,6 +6,8 @@ import random
 
 import aiocoap.resource as Res
 from aiocoap.numbers.contentformat import ContentFormat
+from aiocoap.oscore import *
+from aiocoap.transports.oscore import *
 
 
 class Welcome(Res.Resource):
@@ -72,12 +74,12 @@ class Observable(Res.ObservableResource):
     def update_observation_count(self, count):
         if count and self.handle is None:
             print("Starting observations")
-            
+
             self.current_number = str(random.randint(0, 100)).encode('utf-8')
             self.reschedule()
         if count == 0 and self.handle:
             print("Stopping observations as there are no observers")
-            
+
             self.handle.cancel()
             self.handle = None
 
@@ -87,13 +89,11 @@ class Observable(Res.ObservableResource):
         return aiocoap.Message(payload=self.current_number)
 
 
-# logging setup
-logging.basicConfig(level=logging.INFO)
-logging.getLogger("coap-server").setLevel(logging.DEBUG)
-
-
 async def main():
-    # Resource tree creation
+    oscore_context = FilesystemSecurityContext(
+        basedir="oscore_context/"
+    )
+
     root = Res.Site()
 
     root.add_resource([], Welcome())
@@ -101,13 +101,20 @@ async def main():
     root.add_resource(["withpayload"], WithPayload())
     root.add_resource(["observable"], Observable(1))
 
-    await aiocoap.Context.create_server_context(root)
+    coap_context = await aiocoap.Context.create_server_context(
+        root, bind=('0.0.0.0', 5683)
+    )
 
     print("server running at : coap://localhost:5683")
     print("\tGET\t/")
     print("\tGET\t/whoami")
     print("\tGET\t/observable")
     print("\tPOST\t/withpayload")
+
+    oscore_transport = TransportOSCORE(
+        context=coap_context,
+        forward_context=oscore_context
+    )
 
     # Run forever
     await asyncio.get_running_loop().create_future()
