@@ -1,4 +1,3 @@
-import logging
 import asyncio
 import aiocoap
 
@@ -6,8 +5,7 @@ import random
 
 import aiocoap.resource as Res
 from aiocoap.numbers.contentformat import ContentFormat
-from aiocoap.oscore import *
-from aiocoap.transports.oscore import *
+from aiocoap.oscore_sitewrapper import *
 
 
 class Welcome(Res.Resource):
@@ -32,14 +30,15 @@ class Welcome(Res.Resource):
 class WhoAmI(Res.Resource):
     async def render_get(self, request):
         return_text = []
-        return_text.append(["Used protocol: %s." % request.remote.scheme])
+        return_text.append("Used protocol: %s." % request.remote.scheme)
         return_text.append("Request came from %s." % request.remote.hostinfo)
         return_text.append(
             "The server address used %s." %
             request.remote.hostinfo_local
         )
+        payload = "\n".join(return_text).encode("utf8")
 
-        return aiocoap.Message(content_format=ContentFormat.TEXT, payload="\n".join(return_text).encode("utf8"))
+        return aiocoap.Message(content_format=ContentFormat.TEXT, payload=payload)
 
 
 class WithPayload(Res.Resource):
@@ -90,11 +89,23 @@ class Observable(Res.ObservableResource):
 
 
 async def main():
-    oscore_context = FilesystemSecurityContext(
-        basedir="oscore_context/"
-    )
+
+    from aiocoap.credentials import CredentialsMap
+
+    credentials_dict = {
+        "coap://192.168.1.100/*": {
+            "oscore": {
+                "basedir": "./oscore_context"
+            }
+        },
+    }
+
+    # Create and load credentials map
+    credentials = CredentialsMap()
+    credentials.load_from_dict(credentials_dict)
 
     root = Res.Site()
+    root_secured = OscoreSiteWrapper(root,credentials)
 
     root.add_resource([], Welcome())
     root.add_resource(["whoami"], WhoAmI())
@@ -102,7 +113,7 @@ async def main():
     root.add_resource(["observable"], Observable(1))
 
     coap_context = await aiocoap.Context.create_server_context(
-        root, bind=('0.0.0.0', 5683)
+        root_secured, bind=('0.0.0.0', 5683)
     )
 
     print("server running at : coap://localhost:5683")
@@ -110,11 +121,6 @@ async def main():
     print("\tGET\t/whoami")
     print("\tGET\t/observable")
     print("\tPOST\t/withpayload")
-
-    oscore_transport = TransportOSCORE(
-        context=coap_context,
-        forward_context=oscore_context
-    )
 
     # Run forever
     await asyncio.get_running_loop().create_future()

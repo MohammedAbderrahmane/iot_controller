@@ -16,3 +16,6 @@ local.properties
 /shelf/*
 workspace.xml
 
+sequence.json
+lock
+

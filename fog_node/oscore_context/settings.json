@@ -1,5 +1,5 @@
 {
-    "sender-id_hex": "00",
-    "recipient-id_hex": "11",
-    "secret_hex": "0123456789"
+    "sender-id_ascii": "iot",
+    "recipient-id_ascii": "client",
+    "secret_ascii": "0000"
 }
