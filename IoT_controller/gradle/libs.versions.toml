@@ -1,5 +1,6 @@
 [versions]
 agp = "8.5.0"
+californiumCore = "3.5.0"
 kotlin = "2.1.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -11,9 +12,11 @@ material = "1.12.0"
 activity = "1.10.0"
 constraintlayout = "2.2.0"
 okhttp = "4.12.0"
+cfOscore = "4.0.0-M3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+californium-core = { module = "org.eclipse.californium:californium-core", version.ref = "californiumCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -23,6 +26,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+cf-oscore = { group = "org.eclipse.californium", name = "cf-oscore", version.ref = "cfOscore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

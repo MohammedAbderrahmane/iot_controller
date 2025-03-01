@@ -8,7 +8,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -16,12 +15,13 @@ import androidx.core.view.WindowInsetsCompat
 import org.eclipse.californium.core.CoapClient
 import org.eclipse.californium.core.CoapHandler
 import org.eclipse.californium.core.CoapResponse
+import org.eclipse.californium.core.coap.CoAP.Code
 import org.eclipse.californium.core.coap.MediaTypeRegistry
+import org.eclipse.californium.core.coap.Request
+import org.eclipse.californium.oscore.HashMapCtxDB
+import org.eclipse.californium.oscore.OSCoreCoapStackFactory
+import org.eclipse.californium.oscore.OSCoreCtx
 
-
-//import org.eclipse.californium.core.CoapClient
-//import org.eclipse.californium.core.CoapResponse
-//import org.eclipse.californium.core.coap.MediaTypeRegistry
 
 class HomeActivity : AppCompatActivity() {
 
@@ -30,10 +30,11 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var input_url: EditText
     private lateinit var input_body: EditText
     private lateinit var btn_request: Button
-//    private lateinit var btn_stop_observing: Button
+    private lateinit var btn_stop_observing: Button
     private lateinit var text_result: TextView
     private lateinit var spinner_choice: Spinner
 
+    lateinit var coapClient: CoapClient
     private var choice = "GET"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,25 +53,20 @@ class HomeActivity : AppCompatActivity() {
         spinner_choice = findViewById(R.id.input_choice)
         input_body = findViewById(R.id.input_body)
         btn_request = findViewById(R.id.btn_send_request)
-//        btn_stop_observing = findViewById(R.id.btn_stop_observing)
+        btn_stop_observing = findViewById(R.id.btn_stop_observing)
         text_result = findViewById(R.id.text_result)
 
 
         val options = listOf("GET", "GET (OBSERVE)", "POST")
         val adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            options
+            this, android.R.layout.simple_spinner_item, options
         )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner_choice.adapter = adapter
 
         spinner_choice.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long,
+                parent: AdapterView<*>?, view: View?, position: Int, id: Long,
             ) {
                 choice = options[position];
 
@@ -78,12 +74,12 @@ class HomeActivity : AppCompatActivity() {
                     input_body.visibility = View.VISIBLE
                     return
                 }
-//                if (choice == "GET (OBSERVE)") {
-//                    btn_stop_observing.visibility = View.VISIBLE
-//                    return
-//                }
+                if (choice == "GET (OBSERVE)") {
+                    btn_stop_observing.visibility = View.VISIBLE
+                    return
+                }
                 input_body.visibility = View.GONE
-//                btn_stop_observing.visibility = View.GONE
+                btn_stop_observing.visibility = View.GONE
 
             }
 
@@ -99,50 +95,116 @@ class HomeActivity : AppCompatActivity() {
         val resource = input_url.text.toString()
 
         val url = "coap://$ip:$port/$resource"
-        val coapClient = CoapClient(url)
+
+        val masterSecret: ByteArray = "0000".toByteArray(Charsets.US_ASCII)
+        val clientId: ByteArray = "client".toByteArray(Charsets.US_ASCII)
+        val serverId: ByteArray = "iot".toByteArray(Charsets.US_ASCII)
+
+        val context: OSCoreCtx = OSCoreCtx(
+            masterSecret,
+            true,
+            null,
+            clientId,
+            serverId,
+            null,
+            32,
+            null,
+            null,
+            1024
+        )
+        val db: HashMapCtxDB = HashMapCtxDB()
+        db.addContext(url, context)
+        OSCoreCoapStackFactory.useAsDefault(db)
+
+        coapClient = CoapClient(url)
+        coapClient.setTimeout(5000)
 
         if (choice == "GET") {
+            val request = Request(Code.GET)
+            request.options.setOscore(byteArrayOf(0))
 
-            val response: CoapResponse? = coapClient.get()
-            if (response != null && response.isSuccess)
-                text_result.text = "${response?.code} : ${response.responseText}"
-            else
-                text_result.text = "${response?.code}"
+            Thread {
+                val response: CoapResponse? = coapClient.advanced(request)
+                runOnUiThread {
+                    if (response != null && response.isSuccess)
+                        text_result.text =
+                            "${response?.code} : ${response.responseText} \npayload size=${response.payloadSize} : ${response.payload.toString()}"
+                    else text_result.text = "${response?.code}"
+                }
+                coapClient.shutdown()
+            }.start()
 
-            coapClient.shutdown()
 
         } else if (choice == "POST") {
             val body = input_body.text.toString()
 
-            val response: CoapResponse? = coapClient.post(body, MediaTypeRegistry.TEXT_PLAIN)
-            if (response != null && response.isSuccess)
-                text_result.text = "${response?.code} : ${response.responseText}"
-            else
-                text_result.text = "${response?.code}"
-            coapClient.shutdown()
+            val request = Request(Code.POST)
+            request.options.setOscore(byteArrayOf(0))
+            request.options.contentFormat = MediaTypeRegistry.TEXT_PLAIN
+            request.payload = body.toByteArray()
+
+            Thread {
+                val response: CoapResponse? = coapClient.advanced(request)
+                runOnUiThread {
+                    if (response != null && response.isSuccess)
+                        text_result.text =
+                            "${response?.code} : ${response.responseText} \npayload size=${response.payloadSize} : ${response.payload.toString()}"
+                    else text_result.text = "${response?.code}"
+                }
+                coapClient.shutdown()
+            }.start()
+
         } else {
-            val handler = object : CoapHandler {
-                override fun onLoad(response: CoapResponse) {
-                    text_result.text = "${response?.code} : ${response.responseText}"
+            val request = Request(Code.GET)
+            request.options.setOscore(byteArrayOf(0))
+            request.setObserve()
 
-                }
 
-                override fun onError() {
-                    text_result.text = "Observation failed"
-                }
-            }
+            Thread {
+                coapClient.advanced(object : CoapHandler {
+                    override fun onLoad(response: CoapResponse) {
+                        runOnUiThread {
+                            text_result.text = "${response?.code} : ${response.responseText}"
+                        }
+                    }
 
-            coapClient.observe(handler)
-
+                    override fun onError() {
+                        runOnUiThread {
+                            text_result.text = "Observation failed"
+                        }
+                    }
+                }, request)
+            }.start()
         }
+
     }
 
-//    fun handleStopObserving(view: View) {
-//        Runtime.getRuntime().addShutdownHook(Thread {
-//            relation.proactiveCancel()
-//            coapClient.shutdown()
-//        })
-//    }
+    fun createOscoreContext(url: String): HashMapCtxDB {
+        val masterSecret: ByteArray = "0000".toByteArray(Charsets.US_ASCII)
+        val clientId: ByteArray = "client".toByteArray(Charsets.US_ASCII)
+        val serverId: ByteArray = "iot".toByteArray(Charsets.US_ASCII)
+
+        val context: OSCoreCtx = OSCoreCtx(
+            masterSecret,
+            true,
+            null,
+            clientId,
+            serverId,
+            null,
+            32,
+            null,
+            null,
+            1024
+        )
+        val db: HashMapCtxDB = HashMapCtxDB()
+        db.addContext(context)
+        OSCoreCoapStackFactory.useAsDefault(db)
+        return db
+    }
+
+    fun handleStopObserving(view: View) {
+        coapClient.shutdown()
+    }
 
 
 }

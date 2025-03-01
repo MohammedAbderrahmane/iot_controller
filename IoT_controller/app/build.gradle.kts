@@ -61,7 +61,6 @@ dependencies {
 
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
-    implementation("org.eclipse.californium:californium-core:3.5.0") {
-        exclude(group = "META-INF", module = "legal/LICENSE")
-    }
+    implementation(libs.californium.core)
+    implementation(libs.cf.oscore)
 }
