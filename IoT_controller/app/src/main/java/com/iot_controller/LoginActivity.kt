@@ -124,7 +124,7 @@ class LoginActivity : AppCompatActivity() {
             Toast.makeText(this@MainActivity, error.toString(), Toast.LENGTH_LONG).show()
         }
 */
-        val intent = Intent(this, HomeActivity::class.java)
+        val intent = Intent(this, TokenActivity::class.java)
         startActivity(intent)
     }
 

@@ -12,7 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IoTcontroller"
         tools:targetApi="31"
-        android:usesCleartextTraffic="true" >
+        android:usesCleartextTraffic="true">
+
+        <activity
+            android:name=".TokenActivity"
+            android:exported="false" />
         <activity
             android:name=".HomeActivity"
             android:exported="false" />

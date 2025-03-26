@@ -63,4 +63,5 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.californium.core)
     implementation(libs.cf.oscore)
+    implementation(files("libs/maabe.aar"))
 }

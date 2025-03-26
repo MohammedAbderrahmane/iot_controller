@@ -18,4 +18,12 @@ workspace.xml
 
 sequence.json
 lock
+coap_server
+ignored/
+temp/
 
+maabe-go/maabe.aar
+maabe-go/maabe-sources.jar
+IoT_controller/.idea/*
+IoT_controller/app/src/main/java/com/iot_controller/Edhoc/*
+IoT/coap_server

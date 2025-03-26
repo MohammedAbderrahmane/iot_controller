@@ -3,12 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TOKEN_SIZE 32
+
 typedef void (*coap_method_handler_t)(coap_resource_t *resource, coap_session_t *session,
                                       const coap_pdu_t *request, const coap_string_t *query,
                                       coap_pdu_t *response);
 
 FILE *oscore_sequence_file = NULL;
 char *oscore_sequence_file_path = "sequence";
+unsigned char *token;
 
 static int oscore_save_sequence_number(uint64_t sender_seq_num, void *param COAP_UNUSED) {
 
@@ -82,12 +85,36 @@ void register_coap_resource(coap_context_t *context, const char *resource_name,
 void hello_resource(coap_resource_t *resource, coap_session_t *session, const coap_pdu_t *request,
                     const coap_string_t *query, coap_pdu_t *response);
 
+void set_up_resource(coap_resource_t *resource, coap_session_t *session, const coap_pdu_t *request,
+                     const coap_string_t *query, coap_pdu_t *response);
+
 char *listen_address = "0.0.0.0";
 char *listen_port = "5683";
 
-int main(int argc, char **argv) {
-    coap_startup();
+unsigned char *generateToken() {
+    const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const size_t charset_size = sizeof(charset) - 1; // -1 to exclude the null terminator
+    unsigned char *random_bytes = (unsigned char *)malloc(TOKEN_SIZE * sizeof(unsigned char));
+    for (int i = 0; i < TOKEN_SIZE; i++) {
+        int index = rand() % charset_size;
+        random_bytes[i] = charset[index];
+    }
+    printf("Generated Token: ");
+    for (int i = 0; i < TOKEN_SIZE; i++) {
+        printf("%02x", random_bytes[i]);
+    }
+    printf("\n");
+    return random_bytes;
+}
 
+int main(int argc, char **argv) {
+    token = generateToken();
+
+    printf("coap server running at coap://%s:%s/\n", listen_address, listen_port);
+    printf("\t/\n");
+    printf("\t/.well-known/info\n");
+
+    coap_startup();
 
     static uint8_t oscore_config[] = "master_secret,ascii,\"0000\"\n"
                                      "sender_id,ascii,\"iot\"\n"
@@ -96,10 +123,8 @@ int main(int argc, char **argv) {
     coap_context_t *context = create_coap_context(listen_address, listen_port);
     set_up_oscore(context, oscore_config,sizeof(oscore_config));
 
-    printf("coap server running at coap://%s:%s/", listen_address, listen_address);
-    printf("\t/");
-
-    register_coap_resource(context, "", COAP_REQUEST_GET, hello_resource);
+    register_coap_resource(context, "", COAP_REQUEST_POST, hello_resource);
+    register_coap_resource(context, ".well-known/info", COAP_REQUEST_GET, set_up_resource);
     start_coap_server(context);
 
     coap_free_context(context);
@@ -108,8 +133,40 @@ int main(int argc, char **argv) {
 
 void hello_resource(coap_resource_t *resource, coap_session_t *session, const coap_pdu_t *request,
                     const coap_string_t *query, coap_pdu_t *response) {
+    coap_tick_t t;
+    size_t payload_size;
+    const uint8_t *payload;
+
+    // --- Authorization cheching ---
+    coap_get_data(request, &payload_size, &payload);
+    if (payload_size < TOKEN_SIZE) {
+        const char *response_data = "There is no authorization token";
+        coap_add_data(response, strlen(response_data), (const uint8_t *)response_data);
+        coap_pdu_set_code(response, COAP_RESPONSE_CODE_UNAUTHORIZED);
+        return;
+    }
+    printf("%ld %d\n",payload_size,TOKEN_SIZE);
+    printf("%.*s\n", (int)payload_size, (const char *)payload);
+    for (size_t i = 0; i < TOKEN_SIZE; i++) {
+        if (payload[i] != token[i]) {
+            const char *response_data = "wrong authorization token";
+            coap_add_data(response, strlen(response_data), (const uint8_t *)response_data);
+            coap_pdu_set_code(response, COAP_RESPONSE_CODE_UNAUTHORIZED);
+            return;
+        }
+    }
+    // --- Authorization cheching done ---
+
 
     const char *response_data = "Hello from IoT!";
     coap_add_data(response, strlen(response_data), (const uint8_t *)response_data);
+    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
+}
+
+void set_up_resource(coap_resource_t *resource, coap_session_t *session, const coap_pdu_t *request,
+                     const coap_string_t *query, coap_pdu_t *response) {
+
+    const unsigned char *response_data = token;
+    coap_add_data(response, TOKEN_SIZE, (const uint8_t *)response_data);
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
 }

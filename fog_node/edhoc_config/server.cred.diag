@@ -1,0 +1,17 @@
+{
+  "coap://192.168.1.100/*": {                   # replace with own pubic address
+    "edhoc-oscore": {                   # or leave for local testing
+      "suite": 2,
+      "method": 3,
+      "own_cred_style": "by-key-id",
+      "own_cred": {14:{8:{1:{1:2,2:h'0a',-1:1,-2:h'35ca987c9b87234ac9e86dd0803e2d067896874c7f9252d3a0e75082ff7ecf71',-3:h'b6426501920c53acf83399e82256267d194d37ddef162acb35c1f5ee6f08075b'}}}},                  # replace dots with the {14:...}
+                                        # from before
+      "private_key_file": "server.cosekey",
+    }
+  },
+  ":ourclient": { "edhoc-oscore": {
+      "suite": 2,
+      "method": 3,
+      "peer_cred": {14:{8:{1:{1:2,2:h'01',-1:1,-2:h'64c97acfc9996afad16692f23b4187414cf95acd663bcf7498e8a45413e8a281',-3:h'212f1cb5ca9003aeccc9c96f57c27db804383f4c5f679d703f1a8a68c63773b0'}}}},         # replace dots with own_cred from client
+  },},
+}
