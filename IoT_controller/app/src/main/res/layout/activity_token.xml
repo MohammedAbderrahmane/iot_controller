@@ -5,31 +5,61 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:onClick="handleGetToken"
     android:orientation="vertical"
     tools:context=".TokenActivity">
 
 
+    <Spinner
+        android:id="@+id/spinner_object_choice"
+        android:layout_width="match_parent"
+        android:padding="10dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:entries="@array/options_array" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="fog node objects regestry : coap://192.168.1.100/objects" />
+
     <CheckBox
         android:id="@+id/checkbox_oscore"
         android:layout_width="match_parent"
-        android:layout_marginTop="128dp"
         android:layout_height="wrap_content"
-        android:text="with oscore ?" />
+        android:text="with oscore ?"/>
 
     <Button
         android:id="@+id/btn_token"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="get token" />
-
-    <TextView
-        android:id="@+id/text_token"
+    <Button
+        android:id="@+id/btn_decrypt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="..."
-        android:textSize="24dp" />
+        android:text="decrypt token" />
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+        <TextView
+            android:id="@+id/text_token"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="..."
+            android:textSize="24dp" />
+    </ScrollView>
+
+
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="objet iot : coap://192.168.1.100:5684/" />
     <Button
     android:id="@+id/btn_iot"
     android:layout_width="match_parent"
@@ -42,6 +72,8 @@
         android:layout_height="wrap_content"
         android:text="..."
         android:textSize="24dp" />
+
+
 
 
 </LinearLayout>

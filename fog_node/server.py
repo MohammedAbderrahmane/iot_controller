@@ -14,17 +14,21 @@ import subprocess
 MAABE_ENCRYPTOR_SCRIPT = "encryptor/maabe-encryptor"
 
 iot_objects = {
-    "1": {
-        "ip_address": "192.168.100",
-        "port": "5683",
+    "test": {
+        "ip_address": "1.2.3.4",
+        "port": "1234",
         "oscore_context": {
-            "sender-id_ascii": "client",
-            "recipient-id_ascii": "iot",
-            "secret_ascii": "0000"
+            "sender-id_ascii": "1234",
+            "recipient-id_ascii": "1234",
+            "secret_ascii": "1234"
         },
-        "accessPolicy": "( tlemcen:prof OR tlemcen:etudiant )"
+        "accessPolicy": ""
     }
 }
+
+
+PORT = 5683
+IP_ADDRESS = "0.0.0.0"
 
 
 def generateCypherText(message, access_policy_str):
@@ -91,7 +95,6 @@ class Observable(Res.ObservableResource):
         self.current_number = str(random.randint(0, 100)).encode('utf-8')
         # response = aiocoap.Message(payload=self.current_number)
 
-
         self.updated_state()
         print("sent %s" % self.current_number)
         self.reschedule()
@@ -124,8 +127,43 @@ class ObjectToken(Res.Resource):
 
         if iot_objects.get(payload) == None:
             return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=tokenCyphered.encode("utf8"))
-        tokenCyphered = iot_objects.get(payload).get("tokenCyphred")
+        tokenCyphered = iot_objects.get(payload).get("encrypted_token")
+        to_send = {
+            "ip_address": iot_objects.get(payload).get("ip_address"),
+            "port": iot_objects.get(payload).get("port"),
+        }
+        json.dumps()
         return aiocoap.Message(content_format=ContentFormat.TEXT, payload=tokenCyphered.encode("utf8"))
+
+
+class ObjectRegister(Res.Resource):
+    async def render_post(self, request):
+        payload = request.payload.decode('utf-8')
+        if payload == None:
+            return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"payload empty")
+
+        try:
+            import json
+            object_map = json.loads(request.payload)
+
+        except Exception as e:
+            return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"failed to parse data")
+
+        for key in object_map:
+            iot_objects[key] = object_map[key]
+
+            import secrets
+            token = secrets.token_urlsafe(32)
+
+            cyphertext = generateCypherText(
+                token,
+                object_map[key]['access_policy']
+            )
+            object_map[key]['encrypted_token'] = cyphertext
+
+            return aiocoap.Message(content_format=ContentFormat.TEXT,
+                                   code=aiocoap.CONTENT,
+                                   payload=token.encode())
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -134,68 +172,41 @@ logging.getLogger("coap-server.oscore-site").setLevel(logging.DEBUG)
 
 async def main():
 
-    # from aiocoap.credentials import CredentialsMap
+    from aiocoap.credentials import CredentialsMap
 
-    # credentials_dict = {
-    #     "coap://192.168.1.100/*": {
-    #         "oscore": {
-    #             "basedir": "./oscore_context"
-    #         }
-    #     },
-    # }
+    credentials_dict = {
+        "coap://192.168.1.100/*": {
+            "oscore": {
+                "basedir": "./oscore_context"
+            }
+        },
+    }
 
-    # client_credentials_dict = {
-    #     "coap://192.168.1.100/*": {
-    #         "oscore": {
-    #             "basedir": "./oscore_context_client"
-    #         }
-    #     },
-    # }
-
-    # # Create and load credentials map
-    # credentials = CredentialsMap()
-    # credentials.load_from_dict(credentials_dict)
+    # Create and load credentials map
+    credentials = CredentialsMap()
+    credentials.load_from_dict(credentials_dict)
 
     root = Res.Site()
-    # root_secured = OscoreSiteWrapper(root, credentials)
+    root_secured = OscoreSiteWrapper(root, credentials)
 
     root.add_resource([], Welcome())
     root.add_resource(["whoami"], WhoAmI())
     root.add_resource(["withpayload"], WithPayload())
+    root.add_resource(["register"], ObjectRegister())
     root.add_resource(["objects"], ObjectToken())
     root.add_resource(["observable"], Observable(1))
 
     coap_context = await aiocoap.Context.create_server_context(
-        root, bind=('0.0.0.0', 5683)
+        root_secured, bind=(IP_ADDRESS, PORT)
     )
 
-    print("server running at : coap://localhost:5683")
+    print(f"server running at : coap://{IP_ADDRESS}:{PORT}")
     print("\tGET\t/")
     print("\tGET\t/whoami")
     print("\tGET\t/observable")
     print("\tPOST\t/withpayload")
     print("\tPOST\t/objects")
-
-    for key, value in iot_objects.items():
-        coap_context = await aiocoap.protocol.Context.create_client_context()
-        # coap_context.client_credentials.load_from_dict({
-        #     "coap://192.168.1.12/*": {"oscore": {"basedir": "oscore_context_client/"}}
-        # })
-
-        # oscore_conf = FilesystemSecurityContext("oscore_context_client")
-        # oscore_context = TransportOSCORE(coap_context,coap_context)
-        request = aiocoap.Message(
-            code=aiocoap.GET, uri=f"coap://{value.get('ip_address')}:{value.get('port')}/.well-known/info")
-        requester = coap_context.request(request)
-
-        response = await requester.response
-
-        value['token'] = response.payload.decode()
-        cyphertext = generateCypherText(
-            value.get("token"),
-            value['accessPolicy']
-        )
-        value['tokenCyphred'] = cyphertext
+    print("\tPOST\t/register")
 
     # Run forever
     await asyncio.get_running_loop().create_future()
