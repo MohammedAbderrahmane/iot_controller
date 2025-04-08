@@ -76,6 +76,10 @@ coap_response_t fog_registry_response_handler(coap_session_t *session, const coa
     return COAP_RESPONSE_OK;
 }
 
+static int oscore_tmp_save_seq_num(uint64_t sender_seq_num, void *param COAP_UNUSED) {
+    return 1;
+}
+
 int contact_fog_node(const unsigned char *server_uri, unsigned char *iot_info) {
     coap_context_t *client_coap_context = NULL;
     coap_session_t *session = NULL;
@@ -92,14 +96,27 @@ int contact_fog_node(const unsigned char *server_uri, unsigned char *iot_info) {
 
     client_coap_context = coap_new_context(NULL);
 
+    static uint8_t oscore_key[] =
+        "master_secret,ascii,\"0000\"\n"
+        "server_id,ascii,\"client\"\n"
+        "recipient_id,ascii,\"fog\"\n";
+
+    coap_str_const_t config = { sizeof(oscore_key), oscore_key };
+    uint64_t start_seq_num = 0;
+    coap_oscore_conf_t *oscore_conf;
+
+    oscore_conf = coap_new_oscore_conf(config, oscore_tmp_save_seq_num,
+                                       NULL, start_seq_num);
+
+
     /* Support large responses */
     coap_context_set_block_mode(client_coap_context,
                                 COAP_BLOCK_USE_LIBCOAP | COAP_BLOCK_SINGLE_BODY);
-    session = coap_new_client_session(client_coap_context, NULL, &server_addr, COAP_PROTO_UDP);
+    session = coap_new_client_session_oscore(client_coap_context, NULL, &server_addr,COAP_PROTO_UDP, oscore_conf);
 
     coap_register_response_handler(client_coap_context, fog_registry_response_handler);
-    pdu = coap_pdu_init(COAP_MESSAGE_CON, COAP_REQUEST_CODE_POST, coap_new_message_id(session),
-                        coap_session_max_pdu_size(session));
+    pdu = coap_new_pdu(COAP_MESSAGE_CON, COAP_REQUEST_CODE_POST,session);
+    // pdu = coap_pdu_init(COAP_MESSAGE_CON, COAP_REQUEST_CODE_POST, coap_new_message_id(session),coap_session_max_pdu_size(session));
 
     coap_add_option(pdu, COAP_OPTION_URI_PATH, uri.path.length, uri.path.s);
     coap_add_data(pdu, strlen(iot_info), iot_info);

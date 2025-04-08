@@ -1,0 +1,55 @@
+{
+    "ID": "annaba",
+    "Pk": {
+        "attributes": [
+            "etudiant",
+            "prof",
+            "encadrant",
+            "assistant",
+            "agent",
+            "vondeur"
+        ],
+        "EggToAlpha": {
+            "agent": "gXkF1jFRSvRW4Y0NQPO2gt1sBwXWj1+EUCRAAAE5KPRtDbXB+wsvwg2/Z2HJf6vTznoHYjfr5nhbceMwvSbJ/nTJQ9m3fAo0BeCZ/gAcwY2fIAU1NdJUWsPLcMUj+ZqdcLmaMIanwEg9hZgvakzuZYEyvvbqJyTSoRfvFM8isa2GIo0D/Xh0N8/WRlcUnsv4PnFGFhqqZ9P5g1FMvdxVdFDDrYynN/WzLBB1A1m0ij2Rdp+vm88WqpXW2IczHvvVPVWHwu1E/ZZc8MbIHNFvtG/6b0gLBYeMtyIOxFCdYZoBboOCynm62ugZ39UybCtfovNA9wWK2G13XCrq78dAJBKN6t/Qde4HAtY+K+Y6Q6CQSrKhhm9p3WY96Y8E2IRYGioo2Pg/WN0tilwdOcTP1ohPDLbh3gduZ7cztoa+oeZTbnbFTQhjAUJ8osA9btb8xP8+yjhuWcm6u/jsQjZeTnNkjaFBkGl4GZa/TBycUMGAvIAp7ubkeEx134Jw1fE2",
+            "assistant": "W3EHS3keFI3BKNHVQ0hzh3eHojPQiB2w+kxjrOGUlsx7ZR6nKMP9H2PmTbLSbbthhg5LzbPEwG0daE9ujhpqwGpUrEwAiissfPD1GuklLLCB1m2uO8gJvXn+QMjCEvAgQxQxv9pdSbK5ZvBoSKmqcU7cJCqQOiJvlruYeGmlxiCIirRfjRW+UwMgJRIbql4JBZy+GfdUzo/7tE6UijDN4FvIv6+hsfoDYIVkwmOD91aoQqt/Zt8YNG7D/8YVpvIALurm5EaNDVMmYBkWKji0tmrp9tkD/iJzLKdn/RNi4jA9/A+hup4fX7DJvoni7ESpCXLeztLiI7oCL+NZPbGDtIx8kFrr+wfEzToy7oGwvJqmv991gkLpJEePlHUGywH0bwutvpOOIG+h2X0ZNn25Tr8UMMWAJfKrPnpTYg7Wth5i/xQOG55Us2aGR1lxmMZ+7Q63/nHBEDfYEdbK7pv+JYVLW9Ve+Y+XIjGfU3e2DltswejSGi8c5PmIPwz0OrwO",
+            "encadrant": "b3Gotg/jkTpsM7buKWjpDzQCRFtJcndu9kVUbSvr4MY2cfawn+odattPIc31F+DnB4v9l3xAJ0iArKLF8uzCzTVsy11bjQb3WMsTAEhPxBu3WXOP3zcP47H6E81ydTvcZQPenm5/WUi3pW5sFoxOlRRCVPdKC6h4kn6Wo/7tJIAxren+ixVridOneuyAQs6WGK7cW1e8hAW5m/RdP+dDE02Q/KIebdJ0kcTqShEbYzpQiVFoQ4WB9DrTMST5+IEJXMQZg7Y/8CgdiBm6wbfYnQiSgTVKd+D1sgBsYcEUwR+IU0JYORnBYI6Xm+EIbnGIiWAWbTA1bTq5ciGUWdyEjywbvmrnBZ02ndQ9c7OYog8pmys9Tii4ObDqQrP/1XYhe7eIfZKL+Z1MKrTBAGHPIXLu6T041PT9e4fSk6iM1jgScTttf4+92tJnBtN2ZLAIKh65V1lRlW+yAuBrPlXipWSaW3CztGUgYXB+lK/aVvwl8JdLE+AHIej5QvWIQKni",
+            "etudiant": "gLwNs0by2mZEXU+35B+TnfxmQGlLyKzeSCWoiG+1rdNAgaTGMhyuXPxh+o0OHkLaq6wMkqiFaarjl0Z5aUHPMBxypN7gvq1ZdNma1pUiKeHiWr3N8R5hxpM/CcLVibPuYZlIl0tMsdFxFE7e9Ht0LQlY9fRBI+zWb/wCh4NsUZ2C/6WoxeikrDy0sasWTxduz32hkMXY7FRiPmUDWSbT0yZ1X4fOVIhaRqxR8QWxn9qTQFnBSuIY6sqNHvhptDWrWMnSDoQZNTnaJG4wgA2LEt5Fs/PiY5qte2M3rHurl9ZCmtgfUn8EBMZpuR1YuvW1F8nN/L5sKkSfYuzLYs+q3TAJFZCgA1xPdP37llNcf7OzKWmrmWIa55ABzLRAN4aFIElBttLGsABWp055L+vnqT0fMtr4GuhAuJ5qbi4kuU1UCKpJYetNdsxpHHsr6XglS5fYC1r2Zzh0iDdZ4dAVbz+Uo6ZuLquz0mV6NVr53y+XLoGdveZKeJmMyzMmmoNV",
+            "prof": "BbYBbCUvmF2QQl/juUnaFqFX4rna+oU408PDat1HNqBsmL1K3H1o7sY9cE+6kycSM8CGfp4GuRWmjImkCdWfUhj+NQ/A6KSxdvtze5vGsoe7VtRgR8gpILte6EIVssPWPXi0RSMiWUaa6U4Y1K+EfMT3IiTTjAdM/tdRdgQAwuouchKQiXUr76M0YdjjvFuva0XbYDXuArGjJeyQ+ZrTrWFHX7lmMxbeYBVxg/1uEiWB7iYsWj7KubnXNz196XDrasJ1mAWyqMsQvxOPQGs63YBrN8A6Vk5RSAAS1CL9LmFCkx3GYA81OJbDh6SQ+3UMKbllmamy1wN/5XkTNvRwGCnwt8eDk8LrXF5k9r9BYmCC1VX1PsC10+CAXVySRq5Af8X8MQAHWpYWroatvmbVr0+eTmpd/5d9WP16xD8MH3JHqGMhLdtgxPN+QRO6OVOGnhYDC2gOZFDbg5es0HspEhbQVhq/iqdYCo0HRkyBZO86hBZ6Se5pjsBEQs0paVL0",
+            "vondeur": "OaHdTZHdNIMRAIQaOt9+hqzUXZbFUnKjh7Rv4U2JsEkbRiwH58euegnzyjKnu7z+KXY9Uqt+T6rMgKgkZkZKzhcQHyikP6bLVh081Ot0qlrGc0EQfgjmebujhqMqx4EIaW/PBkFDnMhrm4OOjr414Pukch8qeIzsVcv1P6OZxe0ItwiIrGusMKeDIcvxECwsys/lP7Ane/3NByR6rvtujltQM8vBuxc4Scmia4ELBIX7cyTvBY0UfiCllF1auWj9i/65VH/PNqj+znxE1p2J0AeD98Bju5P5aavavyBjd9sgRxtL8tLc0dKOYs6CsqIivf32dV3B8ZW1hEqw+sQPA13p+175RekqqpzSEdNzFo7LTNgTysdGjBXG4DJTXKaYAbTQbHM2ZyXaJuQgZgDD6knNhGsLdpzxzwqPqjLcaOZa7RWC1JmkzcFJ7wXGaKcUVj93bPjp0+0ZX8kXfDsYOYPy5EgMrUyM5kIc+F+oo2KhNEaj5WwPKV03GSi8WR/o"
+        },
+        "GToY": {
+            "agent": "ASntuZnRKn/6wJ8tbmtb2p9vO49mPvtj6wN54q3UHePuaqH7OzdpHk7XUOhfVmcDXZCom0VOvw40rmXnglnnSg1/9urjfYSNEkiin9qej0EO+8j2wnpTMnx6Uq3EcZcHzCDNC9StRFqHRg8RXrd+s/Jq7M1ez0kKQK9VptnbdjJC",
+            "assistant": "AURY+DGTNjnYDTX4ETVx2DC0acdPSYHhKKZkoRZEEPgALQL7xsMIyr8NCwxQBQmQIIM4zTxRSU5e4s7Mp4WZ/dp+GVfgWLGsvkBmoXOKMcl6szMyQS3TiUOnKk4jtrHdKY4oO+jBYekqyjfoG5V4dvYEZ4h6m2wIe0VN+IeCtAg2",
+            "encadrant": "AU4Iit5xSzlJaOQDCIOBJTMgn5sqIleWno7TOSKzMLdPMa6r7MylSRDe27AZNqc1x+XbR6xNvmluyN1KYB4KCeBvqwU8HBBUEtm6eF4iVDEwez4p1QGLP/QuRLnf6++8tom/mvazToZc8DtulQZSozpFifSuOpSj/XZm93cJ21eG",
+            "etudiant": "AYq6tRM14NL2jL9tktLOEliZ5ZDx6xiuNIwK85Ez4U7bAVQZ1a2GtrtPhoyd3PWtEFclQ2LNtXP/RbG4eOnQAMBWvEZBade+KDrQQEeegPz6gMu2p91B8hc3Fd5P8cM3VjllhkqSnp6k8VsxpBgyUW2SV6cZ6VLkUxVaMDjSGu8F",
+            "prof": "ASvW3+60jiY8dS0Y+M5EfIwGL4bRhsQTzdmCRcZolhLKOsUwf9xLJcfeClj84RT/IjqOg5z2c8KicSY/HHt59+Fz3QmbSSjbdlsZyMKmKVWWutIxD1xvieJN6ET01raAnGrqvwgx5igPGsVjz/UWftfz6M/Min2zYM6V71TFkeRo",
+            "vondeur": "AQMqTfZwXTerUatx06iJLtlxCQ8kmKAWGXf3Ij40U6Z7Qsh2pPvm+bhXDH1x9aC5csrlB5G5oDTVLJZuYisuNZ5eTbh9I3IZUdts5AQ3J1seUnN/1RQUAZ1dWjIwcJcO0oG3x2JbQmkNBD5bcjWa9Kz9DbGjLJudy/jMmt+Gm+5i"
+        }
+    },
+    "Sk": {
+        "attributes": [
+            "etudiant",
+            "prof",
+            "encadrant",
+            "assistant",
+            "agent",
+            "vondeur"
+        ],
+        "Alpha": {
+            "agent": "Mzk0MzQ3MDI3NjE0MzM4ODA5MDQ2MDQ2MTE3NjIxNjQ1MzgwMzM2OTk5MTUyMzM0MDQxMDgzNDY3NzY4NjA2MDM3NDI3NTAyNTYwMjA=",
+            "assistant": "NDMyNTc1MjU4NDM3NjkyMzk2MTk2ODQ3MDEzODg3MzIzNTM1OTE0MzYwMTY4MzU0Nzc4NjQwOTI1NjIxNzgxODI1NTA4NTg3NDE5NTU=",
+            "encadrant": "MjU4NDMyNTc1NTU2MDUwMjk0NTEwODgyNDQ2ODE0NjEzNjAwNzQ5NDc3MjI2NDk5MzI1MTcwNTc4MTg0ODg0ODU5MzUxMzM3MjcyMDA=",
+            "etudiant": "NDg3MDQwODYwOTM5NjIwMzU1ODQ0NTkzMTk1NjIzOTQ4MDI5NDg5MjY1MzY0NTc4MDg2Mzc0OTU5MjU2OTExNTg1NTUwODg1ODIyMzk=",
+            "prof": "MTg3NDM2MjEzMDQxMzUwNjY4MDAyNjAzMjg2MzMyODQ3NDE4Mjc4NTcwOTA0MDA1MzcyOTc4NDY1NjA5NTA3OTMwNTY0MDg0ODU3OA==",
+            "vondeur": "MTU1MTc3OTI0NjE0NDE3OTcyNTc5MzE4MTExNTE3MjA2NTI4MDk3NzgyODc5OTUwODQ5MzE5MjU1NTg5NjM0OTE3MDQ5MTg3NzUwMTY="
+        },
+        "Y": {
+            "agent": "NDIyNTA5MTQ0MDgyMTgwOTEwMTQzMDgwNjIxODY5NzA1NzAxODE1MDI4MDE4MTU4NzQwMjUxNjE0MjI5NzEyOTI4MDY0Njg0NDEzOA==",
+            "assistant": "MzU5MTUzMTczMzAyNjY0MDcwMDgwNTQ5OTc1NzE1MzIyMDExNTk3NzMxMzg5NzMxNzUxNzAwMzAwNjY2NDA0NjgwODI3NzEwMTk2MA==",
+            "encadrant": "NDA0NDk4NTM0NTgyMzA5MzQxNDIyNjcxMjU5NTM1MjAwODY2NjM4MTQ4MTAyODA4NzcwMTEwOTcyNTUwMzMzOTU2NTUyNDQxNDg0MjY=",
+            "etudiant": "NTM5MzAxNjQ4MjU5ODA2NjA0MjQ4MTAxNzYzNDc1OTY3Njc5NDc2MjA0OTk2ODA3MjQzMzQ4MTc4Nzc2NjYzNTc2MDEyNjYyNDMzMDI=",
+            "prof": "NDA2OTY0OTYwMjAxODQwMDg5MjUxODQyOTM1NTAzOTUzNzIxNjQzODg1NjA1MDk4MDI1NzU4NzQ5ODQwNzcxMDc2MDA1MTI0NDE3Nw==",
+            "vondeur": "OTE2MTk4NDY1ODU1NTEzMzk5Mjk5NDE3MDE3MzUzMjUzMTYzMzkwMzA1MDE1MTAwOTM5NjQ0MTUwOTQ4OTI1NjY3MzY4ODQ4NDM3Ng=="
+        }
+    }
+}
