@@ -128,11 +128,6 @@ class ObjectToken(Res.Resource):
         if iot_objects.get(payload) == None:
             return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=tokenCyphered.encode("utf8"))
         tokenCyphered = iot_objects.get(payload).get("encrypted_token")
-        to_send = {
-            "ip_address": iot_objects.get(payload).get("ip_address"),
-            "port": iot_objects.get(payload).get("port"),
-        }
-        json.dumps()
         return aiocoap.Message(content_format=ContentFormat.TEXT, payload=tokenCyphered.encode("utf8"))
 
 
@@ -162,7 +157,7 @@ class ObjectRegister(Res.Resource):
             object_map[key]['encrypted_token'] = cyphertext
 
             return aiocoap.Message(content_format=ContentFormat.TEXT,
-                                   code=aiocoap.CONTENT,
+                                   code=aiocoap.CREATED,
                                    payload=token.encode())
 
 
