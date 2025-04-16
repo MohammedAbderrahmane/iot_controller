@@ -6,7 +6,7 @@ async function getAuthority(params) {
     const response = await axios.get(`${base_URL}/authority/`);
     return { ...response.data };
   } catch (error) {
-    throw Error("failed : " + error.response?.data.message || error);
+    return { message: "failed : " + error.response?.data.message || error };
   }
 }
 
@@ -86,14 +86,49 @@ async function addUser(username, password, attributes) {
     return { message: "failed : " + error.response?.data.message || error };
   }
 }
+
 async function getUsers() {
   try {
     const response = await axios.get(`${base_URL}/users/all/`);
     return response.data;
   } catch (error) {
-    throw Error("failed : " + error.response?.data.message || error);
+    return { message: "failed : " + error.response?.data.message || error };
   }
 }
+
+async function loginAsAdmin(credentials) {
+  try {
+    const response = await axios.post(`${base_URL}/admin/login`, credentials);
+    return { ok: true, authToken: response.data };
+  } catch (error) {
+    return { message: "failed : " + error.response?.data.message || error };
+  }
+}
+
+async function verifySession(localAdmin, setAdmin) {
+  const options = { headers: { Authorization: localAdmin.authToken } };
+  try {
+    await axios.get(`${base_URL}/admin/verify`, options);
+
+    console.log(localAdmin.authToken);
+    setAdmin(localAdmin);
+  } catch (error) {
+    console.log(error);
+    disconnect(setAdmin);
+    return false;
+  }
+  return true;
+}
+
+const connect = (setAdmin, admin) => {
+  window.localStorage.setItem("admin", JSON.stringify(admin));
+  setAdmin(admin);
+};
+
+const disconnect = (setAdmin) => {
+  window.localStorage.removeItem("admin");
+  setAdmin(null);
+};
 
 export {
   getAuthority,
@@ -104,4 +139,8 @@ export {
   renewAttribute,
   addUser,
   getUsers,
+  loginAsAdmin,
+  verifySession,
+  connect,
+  disconnect,
 };

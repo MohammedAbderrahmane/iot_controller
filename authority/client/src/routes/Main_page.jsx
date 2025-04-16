@@ -8,7 +8,7 @@ import {
   renewAttribute,
   addUser,
   getUsers,
-} from "./service/service.js";
+} from "../service/service.js";
 
 function AttributeManager() {
   const [info] = createResource(async () => await getAuthority());

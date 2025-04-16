@@ -5,6 +5,7 @@ const fileUpload = require("express-fileupload");
 const { execSync } = require("child_process");
 const db = require("./mysql-config.js");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const MAABE_PUBLIC_PARAMETERS_PATH = "keys/maabe_public_parameters.json";
 const AUTHORITY_PATH = "keys/authority.json";
@@ -13,7 +14,6 @@ const PORT = 2000;
 const GO_CREATE_AUTHORITY_SCRIPT = "maabe/create_authority";
 const GO_ADD_ATTRIBUTE_SCRIPT = "maabe/add_attribute";
 const GO_RENEW_ATTRIBUTE_SCRIPT = "maabe/renew_attribute";
-const C_SEND_AUTH_PK_SCRIPT = "maabe/send_auth_pk";
 
 // ---------
 const app = express();
@@ -141,23 +141,6 @@ app.post("/api/authority/new_attribute", (req, res) => {
   }
 });
 
-app.post("/api/authority/send_public_keys", (req, res) => {
-  const PkJson = JSON.stringify(authority.Pk);
-
-  const FOG_NODE_IP_ADDRESS = "192.168.1.100";
-  const FOG_NODE_PORT = "5683";
-
-  const command = `${C_SEND_AUTH_PK_SCRIPT} ${FOG_NODE_IP_ADDRESS} ${FOG_NODE_PORT} ${PkJson}`;
-  try {
-    execSync(command);
-  } catch (error) {
-    return response
-      .status(400)
-      .json({ message: "cant send authority public key : " + error });
-  }
-});
-// app.delete("/api/authority/attribute", (req, res) => {}); // NOT SURE IF THIS SAFE
-
 app.put("/api/authority/renew_attribute", (req, res) => {
   const { attribute } = req.body;
 
@@ -213,6 +196,7 @@ app.post("/api/user/generate_keys", async (req, res) => {
   }
 });
 
+// app.delete("/api/authority/attribute", (req, res) => {}); // NOT SURE IF THIS SAFE
 // app.delete("/api/user/delete", (req, res) => {});
 // app.delete("/api/user/update", (req, res) => {});
 // app.delete("/api/user/add_attributes", (req, res) => {});
@@ -258,6 +242,47 @@ app.get("/api/users/all", async (req, res) => {
   res.status(200).json(users);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// ---
+
+const admin = () => JSON.parse(fs.readFileSync(`admin.json`).toString());
+
+app.post("/api/admin/login", async (request, response) => {
+  const { username, password, rememberMe } = request.body;
+
+  if (!username || !password || !username.length || !password.length)
+    return response.status(401).send({ message: "Invalid credentials" });
+
+  if (
+    !(username === admin().username) ||
+    !bcrypt.compareSync(password, admin().password)
+  )
+    return response.status(401).send({ message: "Invalid credentials" });
+
+  const authToken = jwt.sign({ username }, process.env.JWT_SECRET, {
+    expiresIn: rememberMe ? "7d" : "30m",
+  });
+
+  response.status(200).send(authToken);
 });
+
+app.get("/api/admin/verify", async (request, response) => {
+  const authorization = request.get("authorization");
+
+  if (!authorization)
+    return response.status(401).send({ message: "no authorization provided" });
+
+  const authToken = authorization.replace("Bearer ", "");
+  try {
+    jwt.verify(authToken, process.env.JWT_SECRET);
+  } catch (error) {
+    if (error.expiredAt)
+      return response.status(401).send({ message: "session expired" });
+    return response.status(401).send({ message: "wrong credentials" });
+  }
+
+  response.status(200).end();
+});
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
