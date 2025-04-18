@@ -7,7 +7,7 @@ const char *PASSWORD = "lGofA94RBd";
 const long INTERVAL = 1000;
 const IPAddress FOG_NODE_IP_ADDRESS(192, 168, 1, 100);
 const int FOG_NODE_PORT = 5683;
-bool e = true;
+const char *ID = "object_1";
 
 WiFiUDP udp;
 Coap coap(udp);
@@ -96,37 +96,23 @@ void setup() {
   coap.start();
 }
 
+bool requestOnce = true;
 void loop() {
-  if (e) {
-    // coap.get(FOG_NODE_IP_ADDRESS, FOG_NODE_PORT, "whoami");
+  if (requestOnce) {
     const char *ID = "object_1";
-    const char *ACCESS_POLICY = "( tlemcen:prof OR tlemcen:etudiant )";
-
-    const char *format =
-      "{\"%s\":"
-      "{\"access_policy\":\"%s\"}}";
-    size_t buffer_size = snprintf(nullptr, 0, format, ID, ACCESS_POLICY) + 1;
-    char *json_string = (char *)malloc(buffer_size);
-    if (!json_string) {
-      Serial.println("Memory allocation failed");
-      return;
-    }
-    snprintf(json_string, buffer_size, format, ID, ACCESS_POLICY);
-
-    uint8_t *json_uint8 = reinterpret_cast<uint8_t *>(json_string);
-    size_t json_length = strlen(json_string);
-
+    uint8_t *id_uint8 = (uint8_t*) ID;
+    size_t id_length = strlen(ID);
 
     coap.send(
       FOG_NODE_IP_ADDRESS,
       FOG_NODE_PORT,
       "register",
       COAP_CON,
-      COAP_POST,
+      COAP_POST,            
       NULL, 0,
-      json_uint8, json_length);
+      id_uint8, id_length);         
 
-    e = false;
+    requestOnce = false;
   }
   unsigned long currentMillis = millis();
 
@@ -171,8 +157,7 @@ void callback_root(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_INTERNAL_SERVER_ERROR,
       COAP_TEXT_PLAIN,
-      packet.token,
-      packet.tokenlen);
+      packet.token,packet.tokenlen );
     return;
   }
   memcpy(payload_string, packet.payload, packet.payloadlen);
@@ -192,8 +177,7 @@ void callback_root(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
-      packet.token,
-      packet.tokenlen);
+ packet.token,packet.tokenlen );
     return;
   }
   if (!(memcmp(payload_string, access_token, strlen(access_token)) == 0)) {
@@ -207,8 +191,7 @@ void callback_root(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
-      packet.token,
-      packet.tokenlen);
+ packet.token,packet.tokenlen );
     return;
   }
 
@@ -236,8 +219,7 @@ void callback_temperature(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_INTERNAL_SERVER_ERROR,
       COAP_TEXT_PLAIN,
-      packet.token,
-      packet.tokenlen);
+ packet.token,packet.tokenlen );
     return;
   }
   memcpy(payload_string, packet.payload, packet.payloadlen);
@@ -257,8 +239,7 @@ void callback_temperature(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
-      packet.token,
-      packet.tokenlen);
+ packet.token,packet.tokenlen );
     return;
   }
   if (!(memcmp(payload_string, access_token, strlen(access_token)) == 0)) {
@@ -272,8 +253,7 @@ void callback_temperature(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
-      packet.token,
-      packet.tokenlen);
+ packet.token,packet.tokenlen );
     return;
   }
 
@@ -303,8 +283,7 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_INTERNAL_SERVER_ERROR,
       COAP_TEXT_PLAIN,
-      packet.token,
-      packet.tokenlen);
+ packet.token,packet.tokenlen );
     return;
   }
   memcpy(payload_string, packet.payload, packet.payloadlen);
@@ -324,8 +303,7 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
-      packet.token,
-      packet.tokenlen);
+ packet.token,packet.tokenlen );
     return;
   }
   if (!(memcmp(payload_string, access_token, strlen(access_token)) == 0)) {
@@ -339,8 +317,7 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
-      packet.token,
-      packet.tokenlen);
+ packet.token,packet.tokenlen );
     return;
   }
   const char *led_state = (char *)(payload_string + strlen(access_token));
@@ -360,8 +337,7 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
       0,
       COAP_BAD_REQUEST, 
       COAP_NONE,
-      packet.token,
-      packet.tokenlen);
+ packet.token,packet.tokenlen );
     return;
   }
 

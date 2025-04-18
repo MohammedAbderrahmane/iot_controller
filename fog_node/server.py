@@ -14,22 +14,10 @@ import subprocess
 MAABE_ENCRYPTOR_SCRIPT = "encryptor/maabe-encryptor"
 
 iot_objects = {
-    "test": {
-        "ip_address": "1.2.3.4",
-        "port": "1234",
-        "oscore_context": {
-            "sender-id_ascii": "1234",
-            "recipient-id_ascii": "1234",
-            "secret_ascii": "1234"
-        },
-        "accessPolicy": ""
-    }
 }
-
 
 PORT = 5683
 IP_ADDRESS = "0.0.0.0"
-
 
 def generateCypherText(message, access_policy_str):
     params = [message, access_policy_str]
@@ -62,12 +50,13 @@ class Welcome(Res.Resource):
 
 
 class WhoAmI(Res.Resource):
+
     async def render_get(self, request):
         return_text = []
         return_text.append("Used protocol: %s." % request.remote.scheme)
         return_text.append("Request came from %s." % request.remote.hostinfo)
         return_text.append(
-            "The server address used %s." %
+            "The server address used %s." % 
             request.remote.hostinfo_local
         )
         payload = "\n".join(return_text).encode("utf8")
@@ -76,6 +65,7 @@ class WhoAmI(Res.Resource):
 
 
 class WithPayload(Res.Resource):
+
     async def render_post(self, request):
         payload = request.payload.decode('utf-8')
 
@@ -85,6 +75,7 @@ class WithPayload(Res.Resource):
 
 
 class Observable(Res.ObservableResource):
+
     def __init__(self, time):
         super().__init__()
         self.time = time
@@ -122,6 +113,7 @@ class Observable(Res.ObservableResource):
 
 
 class ObjectToken(Res.Resource):
+
     async def render_post(self, request):
         payload = request.payload.decode('utf-8')
 
@@ -131,9 +123,22 @@ class ObjectToken(Res.Resource):
         return aiocoap.Message(content_format=ContentFormat.TEXT, payload=tokenCyphered.encode("utf8"))
 
 
-class ObjectRegister(Res.Resource):
-    async def render_post(self, request):
-        payload = request.payload.decode('utf-8')
+class AllObject(Res.Resource):
+
+    async def render_get(self, request):
+        iot_array = []
+
+        for name, info in iot_objects.items():
+            device = {"name": name}
+            device.update(info)
+            iot_array.append(device)
+            
+        response_payload = json.dumps(iot_array)
+        
+        return aiocoap.Message(content_format=ContentFormat.TEXT, payload=response_payload.encode("utf8"))
+
+    async def render_post(self,request):
+        payload = request.payload.decode('utf-8')   
         if payload == None:
             return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"payload empty")
 
@@ -144,21 +149,44 @@ class ObjectRegister(Res.Resource):
         except Exception as e:
             return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"failed to parse data")
 
-        for key in object_map:
-            iot_objects[key] = object_map[key]
+        iot_objects[object_map["name"]] = {
+            **iot_objects.get(object_map["name"], {}),
+            "access_policy": object_map["accessPolicy"]
+        }
+        print(iot_objects)
+        return aiocoap.Message(content_format=ContentFormat.TEXT, payload="ACK".encode("utf8"))
 
-            import secrets
-            token = secrets.token_urlsafe(32)
+    async def render_put(self, request):
+        object_id = request.payload.decode('utf-8')  
 
-            cyphertext = generateCypherText(
-                token,
-                object_map[key]['access_policy']
-            )
-            object_map[key]['encrypted_token'] = cyphertext
+        del iot_objects[object_id]
+        return aiocoap.Message(content_format=ContentFormat.TEXT, payload="ACK".encode("utf8"))
 
-            return aiocoap.Message(content_format=ContentFormat.TEXT,
-                                   code=aiocoap.CREATED,
-                                   payload=token.encode())
+                
+class ObjectRegister(Res.Resource):
+
+    async def render_post(self, request):
+        object_id = request.payload.decode('utf-8')
+        
+
+        print (object_id)
+        if "access_policy" not in iot_objects.get(object_id, {}) or iot_objects[object_id]["access_policy"] is None:
+            return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"object is not yet defined")
+
+        import secrets
+        token = secrets.token_urlsafe(32)
+
+        cyphertext = generateCypherText(
+            token,
+            iot_objects[object_id]['access_policy']
+        )
+        iot_objects[object_id]['encrypted_token'] =       cyphertext
+        iot_objects[object_id]['ip_address'] = request.remote.hostinfo
+        iot_objects[object_id]['port'] = "5683"                        
+
+        return aiocoap.Message(content_format=ContentFormat.TEXT,
+                                code=aiocoap.CREATED,
+                                payload=token.encode())
 
 class AllAttributes(Res.Resource):
 
@@ -231,6 +259,7 @@ async def main():
     root.add_resource(["withpayload"], WithPayload())
     root.add_resource(["register"], ObjectRegister())
     root.add_resource(["objects"], ObjectToken())
+    root.add_resource(["objects", "all"], AllObject())
     root.add_resource(["observable"], Observable(1))
     root.add_resource(["attributes"], AllAttributes())
 
@@ -244,6 +273,9 @@ async def main():
     print("\tGET\t/observable")
     print("\tPOST\t/withpayload")
     print("\tPOST\t/objects")
+    print("\tGET\t/objects/all")
+    print("\tPOST\t/objects/all")
+    print("\tPUT\t/objects/all")
     print("\tPOST\t/register")
     print("\tGET\t/attributes")
     print("\tPOST\t/attributes")
