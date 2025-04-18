@@ -160,6 +160,48 @@ class ObjectRegister(Res.Resource):
                                    code=aiocoap.CREATED,
                                    payload=token.encode())
 
+class AllAttributes(Res.Resource):
+
+    async def render_get(self, request):
+
+        import glob
+        
+        all_attributes = []
+        search_path = os.path.join("maabe-keys", "auth_*.json")
+
+        matching_files = glob.glob(search_path)
+
+        if not matching_files:
+            response_payload = json.dumps(all_attributes)
+            return aiocoap.Message(content_format=ContentFormat.JSON, payload=response_payload.encode("utf8"))
+        for file_path in matching_files:
+            try:
+                if not os.path.isfile(file_path):
+                    continue
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    attributes_list = data.get("attributes")                
+                    all_attributes.extend(attributes_list)
+            except Exception:
+                continue
+        response_payload = json.dumps(all_attributes)
+        return aiocoap.Message(content_format=ContentFormat.JSON, payload=response_payload.encode("utf8"))
+
+    async def render_post(self,request):
+        payload = request.payload.decode('utf-8')   
+        if payload == None:
+            return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"payload empty")
+
+        try:
+            import json
+            new_auth = json.loads(request.payload)
+
+        except Exception as e:
+            return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"failed to parse data")
+        
+        with open(f"maabe-keys/auth_{new_auth['ID']}_keys.json", 'w') as f:
+            json.dump(new_auth["Pk"], f, indent=4)
+
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("coap-server.oscore-site").setLevel(logging.DEBUG)
@@ -190,6 +232,7 @@ async def main():
     root.add_resource(["register"], ObjectRegister())
     root.add_resource(["objects"], ObjectToken())
     root.add_resource(["observable"], Observable(1))
+    root.add_resource(["attributes"], AllAttributes())
 
     coap_context = await aiocoap.Context.create_server_context(
         root_secured, bind=(IP_ADDRESS, PORT)
@@ -202,6 +245,8 @@ async def main():
     print("\tPOST\t/withpayload")
     print("\tPOST\t/objects")
     print("\tPOST\t/register")
+    print("\tGET\t/attributes")
+    print("\tPOST\t/attributes")
 
     # Run forever
     await asyncio.get_running_loop().create_future()

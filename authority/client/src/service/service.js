@@ -10,6 +10,15 @@ async function getAuthority(params) {
   }
 }
 
+async function sendAuthority(params) {
+  try {
+    await axios.get(`${base_URL}/authority/send`);
+    return {  ok: true };
+  } catch (error) {
+    return { message: "failed : " + error.response?.data.message || error };
+  }
+}
+
 async function importPublicParameters(file) {
   const formData = new FormData();
   formData.append("file", file);
@@ -142,5 +151,5 @@ export {
   loginAsAdmin,
   verifySession,
   connect,
-  disconnect,
+  disconnect,sendAuthority
 };

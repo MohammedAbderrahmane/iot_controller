@@ -6,6 +6,7 @@ const { execSync } = require("child_process");
 const db = require("./mysql-config.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const coap = require("coap");
 
 const MAABE_PUBLIC_PARAMETERS_PATH = "keys/maabe_public_parameters.json";
 const AUTHORITY_PATH = "keys/authority.json";
@@ -123,6 +124,27 @@ app.get("/api/authority/", (req, res) => {
     maabePublicParameter: !!maabePublicParameter,
     authority: !!authority ? { ...authority, Sk: undefined } : undefined,
   });
+});
+
+app.get("/api/authority/send", (req, res) => {
+  const coapPayload = { ...authority, Sk: undefined };
+
+  const coapRequest = coap.request({
+    hostname: "192.168.1.100",
+    pathname: "/attributes",
+    method: "POST",
+    
+  });
+  coapRequest.setOption('Block1', Buffer.alloc(0x6))
+  coapRequest.write(JSON.stringify(coapPayload));
+
+  coapRequest
+    .on("response", (res) => {
+      console.log("received response");
+    })
+    .end();
+
+  res.status(200).end();
 });
 
 app.post("/api/authority/new_attribute", (req, res) => {
@@ -283,6 +305,6 @@ app.get("/api/admin/verify", async (request, response) => {
   response.status(200).end();
 });
 
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

@@ -7,7 +7,7 @@ import {
   addAttribute,
   renewAttribute,
   addUser,
-  getUsers,
+  getUsers,sendAuthority
 } from "../service/service.js";
 
 function AttributeManager() {
@@ -35,6 +35,7 @@ function AttributeManager() {
         ) : (
           <>
             <h1>Authority : {info().authority.ID}</h1>
+            <SendAuthority />
             <section>
               <h2>Existing Attributes</h2>
               {info().authority.Pk.attributes.length === 0 ? (
@@ -360,13 +361,13 @@ function AllUsers(params) {
         {!users() ? (
           <p>No users</p>
         ) : (
-          <div style={{display:"flex" , flexDirection:"row"}}>
+          <div style={{ display: "flex", flexDirection: "row" }}>
             {users().map((user) => {
               console.log(user.attributes);
               const attrs = user.attributes.split("/");
               return (
                 <div style="border : solid 1px">
-                  <p style={{textAlign:"center"}}>{user.username}</p>
+                  <p style={{ textAlign: "center" }}>{user.username}</p>
                   {attrs.map((attr) => (
                     <span style="margin : 20px">{attr}</span>
                   ))}
@@ -377,6 +378,32 @@ function AllUsers(params) {
         )}
       </Show>
     </div>
+  );
+}
+
+function SendAuthority(params) {
+  const [status, seStatus] = createSignal({ good: false, message: "" });
+
+  const handleUpload = async () => {
+    const result = await sendAuthority();
+    if (result.ok) {
+      seStatus({
+        good: true,
+        message: "authority sent",
+      });
+      return;
+    }
+    seStatus({ good: false, message: result.message || "unknown error" });
+  };
+
+  return (
+    <section>
+      <h2>Send authority public keys</h2>
+      <p style={{ color: status().good ? "green" : "red" }}>
+        {status().message}
+      </p>
+      <button onClick={handleUpload}>send</button>
+    </section>
   );
 }
 
