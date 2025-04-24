@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/authority_text_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Authority name"
+        android:textSize="16dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/authority_text_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="https://10.10.10.10:80/user/login" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/authority_input_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Username"
+            android:layout_weight="1"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/authority_input_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Password"
+            android:inputType="textPassword" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/authority_text_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="status" />
+
+
+    <Button
+        android:id="@+id/authority_btn_logn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:text="Login and add keys" />
+
+    <TextView
+        android:id="@+id/authority_text_is_authenticated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Arleady authenticated"
+        android:visibility="gone"/>
+
+</LinearLayout>

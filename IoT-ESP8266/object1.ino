@@ -100,7 +100,7 @@ bool requestOnce = true;
 void loop() {
   if (requestOnce) {
     const char *ID = "object_1";
-    uint8_t *id_uint8 = (uint8_t*) ID;
+    uint8_t *id_uint8 = (uint8_t *)ID;
     size_t id_length = strlen(ID);
 
     coap.send(
@@ -108,9 +108,9 @@ void loop() {
       FOG_NODE_PORT,
       "register",
       COAP_CON,
-      COAP_POST,            
+      COAP_POST,
       NULL, 0,
-      id_uint8, id_length);         
+      id_uint8, id_length);
 
     requestOnce = false;
   }
@@ -144,7 +144,7 @@ void callback_root(CoapPacket &packet, IPAddress ip, int port) {
   Serial.print(ip);
   Serial.print(" port :");
   Serial.println(port);
-  
+
   char *payload_string = (char *)malloc(packet.payloadlen + 1);
   if (payload_string == NULL) {
     Serial.println("Memory allocation failed!");
@@ -157,7 +157,7 @@ void callback_root(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_INTERNAL_SERVER_ERROR,
       COAP_TEXT_PLAIN,
-      packet.token,packet.tokenlen );
+      packet.token, packet.tokenlen);
     return;
   }
   memcpy(payload_string, packet.payload, packet.payloadlen);
@@ -177,7 +177,7 @@ void callback_root(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
- packet.token,packet.tokenlen );
+      packet.token, packet.tokenlen);
     return;
   }
   if (!(memcmp(payload_string, access_token, strlen(access_token)) == 0)) {
@@ -191,12 +191,20 @@ void callback_root(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
- packet.token,packet.tokenlen );
+      packet.token, packet.tokenlen);
     return;
   }
 
   const char *response_payload = "Hello from ESP8266!";
-  coap.sendResponse(ip, port, packet.messageid, response_payload, strlen(response_payload));
+  coap.sendResponse(
+    ip,
+    port,
+    packet.messageid,
+    response_payload,
+    strlen(response_payload),
+    COAP_CONTENT,
+    COAP_TEXT_PLAIN,
+    packet.token, packet.tokenlen);
   Serial.print("Resposne sent to !");
   Serial.println(ip);
 }
@@ -206,7 +214,7 @@ void callback_temperature(CoapPacket &packet, IPAddress ip, int port) {
   Serial.print(ip);
   Serial.print(" port :");
   Serial.println(port);
-  
+
   char *payload_string = (char *)malloc(packet.payloadlen + 1);
   if (payload_string == NULL) {
     Serial.println("Memory allocation failed!");
@@ -219,7 +227,7 @@ void callback_temperature(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_INTERNAL_SERVER_ERROR,
       COAP_TEXT_PLAIN,
- packet.token,packet.tokenlen );
+      packet.token, packet.tokenlen);
     return;
   }
   memcpy(payload_string, packet.payload, packet.payloadlen);
@@ -239,7 +247,7 @@ void callback_temperature(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
- packet.token,packet.tokenlen );
+      packet.token, packet.tokenlen);
     return;
   }
   if (!(memcmp(payload_string, access_token, strlen(access_token)) == 0)) {
@@ -253,14 +261,22 @@ void callback_temperature(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
- packet.token,packet.tokenlen );
+      packet.token, packet.tokenlen);
     return;
   }
 
   long temperature = random(0, 100);
   char response_payload[16];
   sprintf(response_payload, "%ld", temperature);
-  coap.sendResponse(ip, port, packet.messageid, response_payload, strlen(response_payload));
+  coap.sendResponse(
+    ip,
+    port,
+    packet.messageid,
+    response_payload,
+    strlen(response_payload),
+    COAP_CONTENT,
+    COAP_TEXT_PLAIN,
+    packet.token, packet.tokenlen);
   Serial.print("Resposne sent to ");
   Serial.println(ip);
 }
@@ -271,7 +287,7 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
   Serial.print(" port :");
   Serial.println(port);
 
- char *payload_string = (char *)malloc(packet.payloadlen + 1);
+  char *payload_string = (char *)malloc(packet.payloadlen + 1);
   if (payload_string == NULL) {
     Serial.println("Memory allocation failed!");
     const char *response_payload = "payload memory allocation failed";
@@ -283,7 +299,7 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_INTERNAL_SERVER_ERROR,
       COAP_TEXT_PLAIN,
- packet.token,packet.tokenlen );
+      packet.token, packet.tokenlen);
     return;
   }
   memcpy(payload_string, packet.payload, packet.payloadlen);
@@ -303,7 +319,7 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
- packet.token,packet.tokenlen );
+      packet.token, packet.tokenlen);
     return;
   }
   if (!(memcmp(payload_string, access_token, strlen(access_token)) == 0)) {
@@ -317,7 +333,7 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
       strlen(response_payload),
       COAP_UNAUTHORIZED,
       COAP_TEXT_PLAIN,
- packet.token,packet.tokenlen );
+      packet.token, packet.tokenlen);
     return;
   }
   const char *led_state = (char *)(payload_string + strlen(access_token));
@@ -329,21 +345,30 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
   } else if (strcmp(led_state, "OFF") == 0) {
     digitalWrite(D4, LOW);
   } else {
+    const char *response_payload = "Incorect request";
     coap.sendResponse(
       ip,
       port,
       packet.messageid,
-      NULL,
-      0,
-      COAP_BAD_REQUEST, 
-      COAP_NONE,
- packet.token,packet.tokenlen );
+      response_payload,
+      strlen(response_payload),
+      COAP_BAD_REQUEST,
+      COAP_TEXT_PLAIN,
+      packet.token, packet.tokenlen);
     return;
   }
 
 
-  const char *response_payload = "OK!";
-  coap.sendResponse(ip, port, packet.messageid, response_payload, strlen(response_payload));
-  Serial.print("Resposne sent to !");
+  const char *response_payload = "OK";
+  coap.sendResponse(
+    ip,
+    port,
+    packet.messageid,
+    response_payload,
+    strlen(response_payload),
+    COAP_CHANGED,
+    COAP_TEXT_PLAIN,
+    packet.token, packet.tokenlen);
+  Serial.print("Resposne sent to ");
   Serial.println(ip);
 }

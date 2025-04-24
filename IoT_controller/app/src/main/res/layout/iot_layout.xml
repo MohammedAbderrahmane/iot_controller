@@ -1,0 +1,68 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_object_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:text="object name"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/text_object_ip_port"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10.10.10.10:5683"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/text_object_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="description"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_object_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text="error"
+            android:textSize="12sp" />
+
+    <Button
+        android:id="@+id/btn_object_action"
+        android:textSize="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#000"
+        android:text="access" />
+
+    <View
+        android:id="@+id/status_object_online"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="4dp"
+        android:background="@drawable/online_status" />
+    </LinearLayout>
+
+</LinearLayout>
