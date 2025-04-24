@@ -1,5 +1,5 @@
 import axios from "axios";
-const base_URL = "http://192.168.1.12:2000/api";
+const base_URL = "/api";
 
 async function getAuthority(params) {
   try {

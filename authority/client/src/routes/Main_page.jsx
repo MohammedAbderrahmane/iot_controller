@@ -29,15 +29,15 @@ function AttributeManager() {
         ) : !info().authority ? (
           <>
             <ImportAuthority />
-            <p>OR</p>
+            <h1>OR</h1>
             <NewAuthority />
           </>
         ) : (
           <>
             <h1>Authority : {info().authority.ID}</h1>
             <SendAuthority />
-            <section>
-              <h2>Existing Attributes</h2>
+            <section class="attributes">
+              <h2>Attributes</h2>
               {info().authority.Pk.attributes.length === 0 ? (
                 <p>No attributes defined yet.</p>
               ) : (
@@ -84,7 +84,7 @@ function ImportPablicParameters(params) {
   };
 
   return (
-    <div>
+    <div class="import_maabe">
       <p>Import the maabe public parameters :</p>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
@@ -118,7 +118,7 @@ function ImportAuthority(params) {
   };
 
   return (
-    <div>
+    <div class="import-authority">
       <p>Import authority</p>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
@@ -161,7 +161,7 @@ function NewAuthority(params) {
   };
 
   return (
-    <div>
+    <div class="create-auth">
       <p>create new authority</p>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
@@ -172,10 +172,10 @@ function NewAuthority(params) {
         onChange={handleChange}
       />
 
-      <button onClick={handleAddAttribute}>add Attribute</button>
+      <button onClick={handleAddAttribute}>add attribute</button>
       <For each={attributes()}>
         {(attr, index) => (
-          <div>
+          <div class="attribute-input">
             <input
               type="text"
               value={attr}
@@ -224,7 +224,7 @@ function AddAttribute(params) {
   };
 
   return (
-    <section>
+    <section class="create-attribute">
       <h2>Create New Attribute</h2>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
@@ -258,7 +258,7 @@ function RenewAttribute(params) {
   };
 
   return (
-    <section>
+    <section class="renew-attribute">
       <h2>Renenw attribute</h2>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
@@ -307,7 +307,7 @@ function NewUser(params) {
   };
 
   return (
-    <section>
+    <section class="new-user">
       <h2>new user</h2>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
@@ -347,7 +347,7 @@ function AllUsers(params) {
     return users;
   });
   return (
-    <div>
+    <div class="list-users">
       <h2>list of users</h2>
       <Show when={users.loading}>
         <p>Loading users...</p>
@@ -361,20 +361,20 @@ function AllUsers(params) {
         {!users() ? (
           <p>No users</p>
         ) : (
-          <div style={{ display: "flex", flexDirection: "row" }}>
+          <>
             {users().map((user) => {
               console.log(user.attributes);
               const attrs = user.attributes.split("/");
               return (
-                <div style="border : solid 1px">
-                  <p style={{ textAlign: "center" }}>{user.username}</p>
+                <div class = "user">
+                  <p>{user.username}</p>
                   {attrs.map((attr) => (
-                    <span style="margin : 20px">{attr}</span>
+                    <span>{attr}</span>
                   ))}
                 </div>
               );
             })}
-          </div>
+          </>
         )}
       </Show>
     </div>
@@ -397,7 +397,7 @@ function SendAuthority(params) {
   };
 
   return (
-    <section>
+    <section class="send_auth">
       <h2>Send authority public keys</h2>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}

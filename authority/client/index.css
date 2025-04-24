@@ -1,0 +1,969 @@
+h1{
+  font-family: sans-serif; 
+  font-size: 3rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+
+/* Basic styling for the entire login page container */
+.login-page {
+    max-width: 400px; /* Limit the maximum width of the form */
+    margin: 50px auto; /* Center the div horizontally and add top margin */
+    padding: 30px;
+    background-color: #ffffff; /* White background */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    font-family: sans-serif; /* Use a common sans-serif font */
+  }
+  
+  /* Style the main heading */
+  .login-page h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333; /* Dark grey color */
+  }
+  
+  /* Style the form elements */
+  .login-page form {
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack elements vertically */
+  }
+  
+  /* Style the labels */
+  .login-page label {
+    margin-bottom: 8px; /* Space between label and input */
+    font-weight: bold;
+    color: #555; /* Medium grey color */
+  }
+  
+  /* Style the input fields */
+  .login-page input[type="text"],
+  .login-page input[type="password"] {
+    padding: 10px;
+    margin-bottom: 15px; /* Space below input fields */
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 4px; /* Slightly rounded input corners */
+    font-size: 1rem;
+  }
+  
+  /* Style the container for the remember me checkbox and label */
+  .remember-me-div {
+    display: flex; /* Use flexbox to align checkbox and label */
+    align-items: center; /* Vertically align items */
+    margin-bottom: 15px; /* Space below the remember me section */
+  }
+  
+  .remember-me-div input[type="checkbox"] {
+    margin-right: 8px; /* Space between checkbox and label */
+  }
+  
+  /* Style the remember me label specifically if needed, though general label style applies */
+  .remember-me-div label {
+    margin-bottom: 0; /* Remove extra margin from the general label style */
+    font-weight: normal; /* Normal weight for the remember me label */
+  }
+  
+  
+  /* Style the status message paragraph */
+  /* The color is already set inline in the JSX, but you can add other styles here */
+  .login-page p {
+    margin-top: 0; /* Remove default top margin */
+    margin-bottom: 15px; /* Space below the status message */
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  
+  /* Style the login button */
+  .login-page button {
+    padding: 12px 20px;
+    background-color: #007bff; /* Primary blue color */
+    color: white; /* White text color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; /* Indicate it's clickable */
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+  }
+  
+  /* Style the button on hover */
+  .login-page button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  
+  /* If using Bootstrap classes btn and btn-wide along with custom styles */
+  /* Ensure these styles don't conflict, or override Bootstrap as needed */
+  .login-page .btn-wide {
+      width: 100%; /* Make the button take the full width */
+  }
+  
+  /* Add some focus styles for accessibility */
+  .login-page input:focus,
+  .login-page button:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+
+  /* Basic styling for the import authority container */
+.import-authority {
+  max-width: 400px; /* Similar width to the login/update forms */
+  margin: 50px auto; /* Center the div horizontally and add top margin */
+  padding: 30px;
+  background-color: #ffffff; /* White background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  font-family: sans-serif; /* Use a common sans-serif font */
+  display: flex; /* Use flexbox to arrange items vertically */
+  flex-direction: column;
+  align-items: center; /* Center items horizontally */
+}
+
+/* Style the main title paragraph */
+.import-authority > p:first-child {
+  font-size: 1.5rem; /* Make it look like a heading */
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 25px; /* Space below the title */
+  text-align: center;
+}
+
+/* Style the status message paragraph */
+.import-authority p:nth-child(2) { /* Target the second paragraph specifically for status */
+  margin-top: 0;
+  margin-bottom: 20px; /* Space below the status message */
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Style the file input container or input itself */
+.import-authority input[type="file"] {
+  margin-bottom: 20px; /* Space below the file input */
+  padding: 8px; /* Add some padding */
+  border: 1px solid #ccc; /* Add a subtle border */
+  border-radius: 4px;
+  width: 100%; /* Make it take full width */
+  box-sizing: border-box; /* Include padding and border in width */
+  /* Note: Styling file inputs is notoriously difficult and inconsistent
+     across browsers. More advanced styling usually involves hiding
+     the default input and styling a label. This is a basic application
+     of styles that may have limited cross-browser effect on appearance
+     beyond basic spacing and borders. */
+}
+
+/* Style the import authority button */
+.import-authority button {
+  padding: 12px 20px;
+  background-color: #007bff; /* Primary blue color */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Make the button full width */
+}
+
+/* Style the button on hover */
+.import-authority button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Style the disabled button */
+.import-authority button:disabled {
+  background-color: #cccccc; /* Grey out the background */
+  cursor: not-allowed; /* Change cursor to indicate not clickable */
+  opacity: 0.6; /* Reduce opacity */
+}
+
+
+/* Add some focus styles for accessibility */
+.import-authority button:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Basic styling for the create authority container */
+.create-auth {
+  max-width: 500px; /* A bit wider than simple forms, similar to new-object */
+  margin: 0 auto; /* Center the div horizontally and add top margin */
+  padding: 30px;
+  background-color: #ffffff; /* White background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  font-family: sans-serif; /* Use a common sans-serif font */
+  /* No need for flex column here, elements will stack naturally */
+}
+
+/* Style the main title paragraph */
+.create-auth > p:first-child {
+  font-size: 1.5rem; /* Make it look like a heading */
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 25px; /* Space below the title */
+  text-align: center;
+}
+
+/* Style the status message paragraph */
+.create-auth p:nth-child(2) { /* Target the second paragraph specifically for status */
+  margin-top: 0;
+  margin-bottom: 20px; /* Space below the status message */
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Style the authority name input field */
+.create-auth input[type="text"]:first-of-type {
+  display: block; /* Make it a block element */
+  width: 100%; /* Full width */
+  padding: 10px;
+  margin-bottom: 15px; /* Space below the input */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+
+/* Style the "add Attribute" button */
+.create-auth > button:nth-of-type(1) { /* Target the first button directly in .create-auth */
+    display: block; /* Make it a block element */
+    margin: 10px auto 20px auto; /* Center and add vertical margin */
+    padding: 8px 15px; /* Smaller padding for a secondary action */
+    background-color: #e9e9e9; /* Light grey background */
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.create-auth > button:nth-of-type(1):hover {
+    background-color: #dcdcdc;
+    border-color: #bbb;
+}
+
+
+/* Style the container for each attribute input row */
+.attribute-row {
+  display: flex; /* Use flexbox to align input and button horizontally */
+  align-items: center; /* Vertically align items */
+  gap: 10px; /* Space between input and button */
+  margin-bottom: 10px; /* Space between attribute rows */
+}
+
+/* Style the attribute input fields within the row */
+.attribute-row input[type="text"] {
+  flex-grow: 1; /* Allow the input to take up available space */
+  padding: 8px; /* Slightly less padding than the main input */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  margin-bottom: 0; /* Remove default bottom margin from input style */
+}
+
+/* Style the remove attribute button ('x' button) */
+.attribute-row .remove-attribute-btn { /* Use the new class */
+  flex-shrink: 0; /* Prevent the button from shrinking */
+  padding: 5px 10px; /* Smaller padding for a compact button */
+  background-color: #dc3545; /* Red color for removal */
+  color: white;
+  border: none;
+  border-radius: 4px; /* Or round if you prefer */
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+  height: 38px; /* Match the height of the input for better alignment */
+  line-height: 28px; /* Vertically center 'x' if height is fixed */
+  text-align: center;
+}
+
+.attribute-row .remove-attribute-btn:hover {
+  background-color: #c82333; /* Darker red on hover */
+}
+
+
+/* Style the "create authority" button (primary action) */
+.create-auth > button:last-of-type { /* Target the last button directly in .create-auth */
+  display: block; /* Make it a block element */
+  margin-top: 20px; /* Space above the button */
+  padding: 12px 20px;
+  background-color: #28a745; /* Green color for creation */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Make the button full width */
+}
+
+.create-auth > button:last-of-type:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+
+/* Style disabled buttons */
+.create-auth button:disabled {
+  background-color: #cccccc !important; /* Grey out, use !important to override other button styles */
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Add some focus styles for accessibility */
+.create-auth input:focus,
+.create-auth button:focus {
+  outline: none;
+  border-color: #007bff; /* Blue focus border */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Blue focus shadow */
+}
+
+.attribute-input {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+.attribute-input > input {
+  margin-bottom: 0;
+}
+.attribute-input > button {
+  align-self: stretch;
+  display: block; /* Make it a block element */
+  padding: 0px 15px;
+  background-color: #a72828; /* Green color for creation */
+  color: white;
+  border: none;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+}
+
+/* Specific focus style for the remove button if needed */
+.attribute-row .remove-attribute-btn:focus {
+   border-color: #dc3545; /* Red focus border */
+   box-shadow: 0 0 5px rgba(220, 53, 69, 0.5); /* Red focus shadow */
+}
+
+/* Basic styling for the import maabe container */
+.import_maabe {
+  max-width: 400px; /* Similar width to the import authority/login forms */
+  margin: 50px auto; /* Center the div horizontally and add top margin */
+  padding: 30px;
+  background-color: #ffffff; /* White background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  font-family: sans-serif; /* Use a common sans-serif font */
+  display: flex; /* Use flexbox to arrange items vertically */
+  flex-direction: column;
+  align-items: center; /* Center items horizontally */
+}
+
+/* Style the main title paragraph */
+.import_maabe > p:first-child {
+  font-size: 1.5rem; /* Make it look like a heading */
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 25px; /* Space below the title */
+  text-align: center;
+}
+
+/* Style the status message paragraph */
+.import_maabe p:nth-child(2) { /* Target the second paragraph specifically for status */
+  margin-top: 0;
+  margin-bottom: 20px; /* Space below the status message */
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Style the file input container or input itself */
+.import_maabe input[type="file"] {
+  margin-bottom: 20px; /* Space below the file input */
+  padding: 8px; /* Add some padding */
+  border: 1px solid #ccc; /* Add a subtle border */
+  border-radius: 4px;
+  width: 100%; /* Make it take full width */
+  box-sizing: border-box; /* Include padding and border in width */
+  /* Note: Styling file inputs is notoriously difficult and inconsistent
+     across browsers. More advanced styling usually involves hiding
+     the default input and styling a label. This is a basic application
+     of styles that may have limited cross-browser effect on appearance
+     beyond basic spacing and borders. */
+}
+
+/* Style the import button */
+.import_maabe button {
+  padding: 12px 20px;
+  background-color: #007bff; /* Primary blue color, consistent with import authority */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Make the button full width */
+}
+
+/* Style the button on hover */
+.import_maabe button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Style the disabled button */
+.import_maabe button:disabled {
+  background-color: #cccccc; /* Grey out the background */
+  cursor: not-allowed; /* Change cursor to indicate not clickable */
+  opacity: 0.6; /* Reduce opacity */
+}
+
+
+/* Add some focus styles for accessibility */
+.import_maabe button:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Basic styling for the send authority container */
+.send_auth {
+  max-width: 400px; /* Similar width to the update UI/login forms */
+  margin: 50px auto; /* Center the div horizontally and add top margin */
+  padding: 30px;
+  background-color: #ffffff; /* White background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  font-family: sans-serif; /* Use a common sans-serif font */
+  text-align: center; /* Center content within the container */
+}
+
+/* Style the main heading */
+.send_auth h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333; /* Dark grey color */
+}
+
+/* Style the paragraph element (status message) */
+.send_auth p {
+  margin-top: 0; /* Remove default top margin */
+  margin-bottom: 20px; /* Space below the status message before the button */
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Style the send button */
+.send_auth button {
+  padding: 12px 20px;
+  background-color: #007bff; /* Primary blue color, consistent with other primary buttons */
+  color: white; /* White text color */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; /* Indicate it's clickable */
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease; /* Smooth hover effect */
+  width: 100%; /* Make the button full width */
+}
+
+/* Style the button on hover */
+.send_auth button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Add some focus styles for accessibility */
+.send_auth button:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Basic styling for the attributes container */
+.attributes {
+  max-width: 500px; /* Moderate width suitable for a list */
+  margin: 50px auto; /* Center the div horizontally and add top margin */
+  padding: 30px;
+  background-color: #ffffff; /* White background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  font-family: sans-serif; /* Use a common sans-serif font */
+}
+
+/* Style the main heading */
+.attributes h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333; /* Dark grey color */
+}
+
+/* Style the paragraph element ("No attributes defined yet.") */
+.attributes p {
+  margin-top: 0;
+  margin-bottom: 15px; /* Space below the paragraph */
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555; /* Medium grey color */
+}
+
+/* Style the unordered list */
+.attributes ul {
+  list-style: none; /* Remove default bullet points */
+  padding: 0; /* Remove default padding */
+  margin: 0; /* Remove default margin */
+}
+
+/* Style each list item (attribute) */
+.attributes li {
+  background-color: #f9f9f9; /* Slightly off-white background for list items */
+  border: 1px solid #e0e0e0; /* Light grey border */
+  border-radius: 4px; /* Slightly rounded corners */
+  padding: 12px 15px; /* Add padding inside the list item */
+  margin-bottom: 10px; /* Space between list items */
+  display: flex; /* Use flexbox for potential internal alignment */
+  align-items: center; /* Vertically align content */
+  word-break: break-word; /* Prevent long attributes from overflowing */
+}
+
+/* Remove margin from the last list item */
+.attributes li:last-child {
+  margin-bottom: 0;
+}
+
+
+/* Style the strong tag within list items */
+.attributes li strong {
+  color: #333; /* Ensure the attribute text is dark */
+  font-weight: bold; /* Keep it bold */
+}
+
+/* Basic styling for the create attribute container */
+.create-attribute {
+  max-width: 400px; /* Similar width to other simple forms */
+  margin: 50px auto; /* Center the div horizontally and add top margin */
+  padding: 30px;
+  background-color: #ffffff; /* White background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  font-family: sans-serif; /* Use a common sans-serif font */
+  /* Elements will stack naturally */
+}
+
+/* Style the main heading */
+.create-attribute h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333; /* Dark grey color */
+}
+
+/* Style the paragraph element (status message) */
+.create-attribute p {
+  margin-top: 0;
+  margin-bottom: 20px; /* Space below the status message */
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Style the label */
+.create-attribute label {
+  display: block; /* Make labels block elements */
+  margin-bottom: 8px; /* Space between label and input */
+  font-weight: bold;
+  color: #555; /* Medium grey color */
+  margin-top: 15px; /* Space above the label */
+}
+
+/* Style the input field */
+.create-attribute input[type="text"] {
+  display: block; /* Make input block element */
+  width: 100%; /* Full width */
+  padding: 10px;
+  margin-bottom: 20px; /* Space below the input */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+
+/* Style the "Add Attribute" button */
+.create-attribute button {
+  padding: 12px 20px;
+  background-color: #28a745; /* Green color for adding/creating, consistent with "create authority" */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Make the button full width */
+  margin-top: 10px; /* Space above the button */
+}
+
+/* Style the button on hover */
+.create-attribute button:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+/* Add some focus styles for accessibility */
+.create-attribute input:focus,
+.create-attribute button:focus {
+  outline: none;
+  border-color: #007bff; /* Blue focus border */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Blue focus shadow */
+}
+
+/* Basic styling for the renew attribute container */
+.renew-attribute {
+  max-width: 400px; /* Similar width to other simple forms */
+  margin: 50px auto; /* Center the div horizontally and add top margin */
+  padding: 30px;
+  background-color: #ffffff; /* White background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  font-family: sans-serif; /* Use a common sans-serif font */
+  /* Elements will stack naturally */
+}
+
+/* Style the main heading */
+.renew-attribute h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333; /* Dark grey color */
+}
+
+/* Style the paragraph element (status message) */
+.renew-attribute p {
+  margin-top: 0;
+  margin-bottom: 20px; /* Space below the status message */
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Style the label */
+.renew-attribute label {
+  display: block; /* Make labels block elements */
+  margin-bottom: 8px; /* Space between label and input */
+  font-weight: bold;
+  color: #555; /* Medium grey color */
+  margin-top: 15px; /* Space above the label */
+}
+
+/* Style the select dropdown */
+.renew-attribute select {
+  display: block; /* Make select block element */
+  width: 100%; /* Full width */
+  padding: 10px;
+  margin-bottom: 20px; /* Space below the select */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background-color: white; /* Ensure background is white */
+  cursor: pointer; /* Indicate it's interactive */
+  /* Appearance none helps with custom styling in some browsers */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* Add a custom arrow if needed, using background-image */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.4-6.3H18.8c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right 10px top 50%;
+  background-size: 12px auto;
+  padding-right: 30px; /* Make space for the custom arrow */
+}
+
+/* Style the "renew Attribute" button */
+.renew-attribute button {
+  padding: 12px 20px;
+  background-color: #007bff; /* Primary blue color for renewing */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Make the button full width */
+  margin-top: 10px; /* Space above the button */
+}
+
+/* Style the button on hover */
+.renew-attribute button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Add some focus styles for accessibility */
+.renew-attribute select:focus,
+.renew-attribute button:focus {
+  outline: none;
+  border-color: #007bff; /* Blue focus border */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Blue focus shadow */
+}
+
+/* Basic styling for the new user container */
+.new-user {
+  max-width: 500px; /* Similar width to create authority form */
+  margin: 50px auto; /* Center the div horizontally and add top margin */
+  padding: 30px;
+  background-color: #ffffff; /* White background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  font-family: sans-serif; /* Use a common sans-serif font */
+  /* Elements will stack naturally */
+}
+
+/* Style the main heading */
+.new-user h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333; /* Dark grey color */
+}
+
+/* Style the paragraph element (status message) */
+.new-user p {
+  margin-top: 0;
+  margin-bottom: 20px; /* Space below the status message */
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Style the labels */
+.new-user label {
+  display: block; /* Make labels block elements */
+  margin-bottom: 8px; /* Space between label and input */
+  font-weight: bold;
+  color: #555; /* Medium grey color */
+  margin-top: 15px; /* Space above the label */
+}
+
+/* Style the input fields */
+.new-user input[type="text"] {
+  display: block; /* Make input block element */
+  width: 100%; /* Full width */
+  padding: 10px;
+  margin-bottom: 15px; /* Space below each input */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* Style the container for attribute buttons - assuming they are siblings */
+/* Add a wrapper div around the buttons in your JSX for better control */
+/* Example if you wrap them: <div class="attribute-buttons-container"> ... </div> */
+/* If not wrapping, buttons will flow as inline-block by default button style */
+.new-user button:not(:last-child) { /* Target all buttons except the last one */
+    display: inline-block; /* Or flex items if using a wrapper with display: flex */
+    margin: 5px; /* Add space around the buttons */
+    padding: 8px 12px; /* Smaller padding for attribute buttons */
+    /* Background color is handled inline */
+    color: white; /* White text for contrast with green/grey */
+    border: none; /* No border for a cleaner look with background color */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 0.3s ease; /* Smooth opacity transition on hover */
+    /* Using inline style for background color */
+}
+
+/* Add subtle hover effect for attribute buttons */
+.new-user button:not(:last-child):hover {
+    opacity: 0.8; /* Reduce opacity slightly on hover */
+}
+
+
+/* Style the "add username" button (primary action) */
+.new-user button:last-child { /* Target the last button directly in .new-user */
+  display: block; /* Make it a block element */
+  margin-top: 25px; /* Space above the button */
+  padding: 12px 20px;
+  background-color: #28a745; /* Green color for adding/creating */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Make the button full width */
+}
+
+/* Style the button on hover */
+.new-user button:last-child:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+
+/* Add some focus styles for accessibility */
+.new-user input:focus,
+.new-user button:focus {
+  outline: none;
+  border-color: #007bff; /* Blue focus border */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Blue focus shadow */
+}
+
+/* Specific focus style for attribute buttons */
+.new-user button:not(:last-child):focus {
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Consistent focus style */
+}
+
+/* Basic styling for the list users container */
+.list-users {
+  max-width: 800px; /* Similar width to the list objects */
+  margin: 50px auto; /* Center the div horizontally and add top margin */
+  padding: 30px;
+  background-color: #ffffff; /* White background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  font-family: sans-serif; /* Use a common sans-serif font */
+}
+
+/* Style the main heading */
+.list-users h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333; /* Dark grey color */
+}
+
+/* Style the paragraph elements (status messages, loading, error, no users) */
+.list-users p {
+  margin-top: 0;
+  margin-bottom: 15px; /* Space below the paragraph */
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+
+/* Style the container that wraps all the user cards */
+.list-users .user-list-container {
+    display: grid; /* Use CSS Grid for a responsive card layout */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive columns, min width 250px */
+    gap: 20px; /* Space between grid items (the cards) */
+    margin-top: 20px; /* Space above the list of cards */
+}
+
+
+/* Style each individual user card */
+.list-users .user-card {
+  border: 1px solid #e0e0e0; /* Light grey border for the card */
+  border-radius: 8px; /* Rounded corners for the card */
+  padding: 20px;
+  background-color: #f9f9f9; /* Slightly off-white background for cards */
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08); /* Subtle shadow for cards */
+  display: flex; /* Use flexbox within the card */
+  flex-direction: column; /* Stack content vertically */
+  align-items: center; /* Center content horizontally within the card */
+}
+
+/* Style the username paragraph within the card */
+.list-users .user-card .user-username {
+  text-align: center; /* Ensure username is centered */
+  margin-top: 0; /* Remove default top margin */
+  margin-bottom: 15px; /* Space below the username */
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Style the container for attributes within the card */
+.list-users .user-card .user-attributes {
+    display: flex; /* Use flexbox to arrange attribute tags */
+    flex-wrap: wrap; /* Allow tags to wrap */
+    gap: 8px; /* Space between attribute tags */
+    justify-content: center; /* Center the tags horizontally */
+}
+
+
+/* Style each attribute span (tag) */
+.list-users .user-card .user-attribute-tag {
+  display: inline-block; /* Treat spans as block elements for padding/margin */
+  background-color: #007bff; /* Primary blue background for tags */
+  color: white; /* White text color */
+  padding: 4px 8px; /* Padding inside the tag */
+  border-radius: 4px; /* Rounded corners for tags */
+  font-size: 0.85rem;
+  font-weight: normal;
+  /* Removed the large inline margin */
+}
+/* Style the container that wraps all the user cards (assuming .user becomes this container) */
+.user-list-container { /* Targeting the div with the class we added in JSX */
+  display: grid; /* Use CSS Grid for a responsive card layout */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive columns, min width 250px */
+  gap: 20px; /* Space between grid items (the cards) */
+  margin-top: 20px; /* Add some space above the list */
+  /* You might want to add max-width and margin: auto here if this is a top-level container */
+  /* max-width: 800px; */
+  /* margin: 20px auto; */
+}
+
+
+/* Style each individual user card */
+.user-list-container .user-card { /* Targeting the div with the class we added in JSX */
+border: 1px solid #e0e0e0; /* Light grey border for the card */
+border-radius: 8px; /* Rounded corners for the card */
+padding: 20px;
+background-color: #f9f9f9; /* Slightly off-white background for cards */
+box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08); /* Subtle shadow for cards */
+display: flex; /* Use flexbox within the card */
+flex-direction: column; /* Stack content vertically */
+align-items: center; /* Center content horizontally within the card */
+}
+
+/* Style the username paragraph within the card */
+.user-list-container .user-card .user-username { /* Targeting the class we added in JSX */
+text-align: center; /* Ensure username is centered */
+margin-top: 0; /* Remove default top margin */
+margin-bottom: 15px; /* Space below the username */
+font-size: 1.1rem;
+font-weight: bold;
+color: #333;
+}
+
+/* Style the container for attributes within the card */
+.user-list-container .user-card .user-attributes { /* Targeting the class we added in JSX */
+  display: flex; /* Use flexbox to arrange attribute tags */
+  flex-wrap: wrap; /* Allow tags to wrap */
+  gap: 8px; /* Space between attribute tags */
+  justify-content: center; /* Center the tags horizontally */
+}
+
+
+/* Style each attribute span (tag) */
+.user-list-container .user-card .user-attribute-tag { /* Targeting the class we added in JSX */
+display: inline-block; /* Treat spans as block elements for padding/margin */
+background-color: #007bff; /* Primary blue background for tags */
+color: white; /* White text color */
+padding: 4px 8px; /* Padding inside the tag */
+border-radius: 4px; /* Rounded corners for tags */
+font-size: 0.85rem;
+font-weight: normal;
+/* Removed the large inline margin */
+}
+
+.user{
+  display: flex;
+  border: 1px solid #e0e0e0; /* Light grey border for the card */
+  border-radius: 8px; /* Rounded corners for the card */
+  padding: 20px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08); /* Subtle shadow for cards */
+  display: flex; /* Use flexbox within the card to arrange content */
+  justify-content: start; /* Space out content and push button to bottom */
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.user > p:first-child {
+  font-size: 2rem;
+  flex: 0 0 100%;
+  font-weight: bolder;
+  text-align: start;
+}
+
+.user > span {
+  padding: 10px;
+  border: 1px solid #e0e0e0; /* Light grey border for the card */
+  background: #36c85867;
+  display: inline;
+  width: fit-content;
+}

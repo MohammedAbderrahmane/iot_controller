@@ -33,7 +33,7 @@ function UpdateSection(params) {
   };
 
   return (
-    <section>
+    <section class="update-ui">
       <h2>update list of objects</h2>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
@@ -45,6 +45,7 @@ function UpdateSection(params) {
 
 function NewObject(params) {
   const [name, setName] = createSignal(null);
+  const [description, setDescription] = createSignal(null);
   const [accessPolicy, setAccessPolicy] = createSignal(null);
   const [status, seStatus] = createSignal({ good: false, message: "" });
   const [attributes] = createResource(async () => {
@@ -55,7 +56,7 @@ function NewObject(params) {
   });
 
   const handleUpload = async () => {
-    const result = await addObject(name(), accessPolicy());
+    const result = await addObject(name(), description(), accessPolicy());
     if (result.ok) {
       seStatus({
         good: true,
@@ -67,7 +68,7 @@ function NewObject(params) {
   };
 
   return (
-    <section>
+    <section class="new-object">
       <h2>set new object</h2>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
@@ -80,7 +81,53 @@ function NewObject(params) {
         }}
       />
 
-      <label for="name">object access policy:</label>
+      <label for="name">object description:</label>
+      <input
+        type="text"
+        onChange={(e) => {
+          setDescription(e.target.value);
+        }}
+      />
+
+
+      <div>
+        <button
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(" OR ");
+              setTimeout(() => setCopiedIndex(null), 2000);
+            } catch (err) {
+              console.error("Failed to copy text: ", err);
+            }
+          }}
+        >
+          OR
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(" AND ");
+              setTimeout(() => setCopiedIndex(null), 2000);
+            } catch (err) {
+              console.error("Failed to copy text: ", err);
+            }
+          }}
+        >
+          AND
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(" ( @ ) ");
+              setTimeout(() => setCopiedIndex(null), 2000);
+            } catch (err) {
+              console.error("Failed to copy text: ", err);
+            }
+          }}
+        >
+          ()
+        </button>
+      </div>
       <Show when={attributes.loading}>
         <p>Loading attributes...</p>
       </Show>
@@ -112,13 +159,14 @@ function NewObject(params) {
           </div>
         )}
       </Show>
+      <label for="name">object access policy:</label>
       <textarea
         type="text"
         onChange={(e) => {
           setAccessPolicy(e.target.value);
         }}
       />
-      <button onClick={handleUpload}>Add Attribute</button>
+      <button onClick={handleUpload}>Add object</button>
     </section>
   );
 }
@@ -143,7 +191,7 @@ function AllObjects(params) {
   };
 
   return (
-    <div>
+    <div class="list-objects">
       <h2>list of objects</h2>
       <Show when={objects.loading}>
         <p>Loading objects...</p>
@@ -163,17 +211,14 @@ function AllObjects(params) {
           <div>
             {objects().map((iot) => {
               return (
-                <div style="border : solid 1px">
-                  <p>object name : {iot.name}</p>
+                <div className={!!iot.ip_address ? "iot-connected" : "iot-not-connected"}>
+                  <p>{iot.name}</p>
+                  <p>object desciption : {iot.description}</p>
                   <p>object access policy : {iot.access_policy}</p>
-                  {!iot.ip_address ? (
-                    <>
-                      <p>object not connected yet</p>
-                    </>
-                  ) : (
+                  {iot.ip_address && (
                     <>
                       <p>
-                        object url : coap://{iot.ip_address}:{iot.port}/
+                        object url : <a>coap://{iot.ip_address}:{iot.port}/</a>
                       </p>
                     </>
                   )}
@@ -186,6 +231,10 @@ function AllObjects(params) {
       </Show>
     </div>
   );
+}
+
+function AllAuthorities(params) {
+
 }
 
 export default MainPage;

@@ -7,7 +7,7 @@ const coap = require("coap");
 
 require("dotenv").config();
 
-const PORT = 2000;
+const PORT = 2210;
 // ---
 const app = express();
 app.use(express.json());
@@ -114,8 +114,8 @@ app.get("/api/objects/update", async (request, response) => {
 });
 
 app.post("/api/objects", async (request, response) => {
-  const { name, accessPolicy } = request.body;
-  const coapPayload = { name, accessPolicy };
+  const { name,description, accessPolicy } = request.body;
+  const coapPayload = { name,description, accessPolicy };
 
   const coapRequest = coap.request({
     hostname: "192.168.1.100",

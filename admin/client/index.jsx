@@ -1,6 +1,7 @@
 import { render } from "solid-js/web";
 import App from "./src/App.jsx";
 import { AdminProvider } from "./src/context/credentilas.jsx";
+import "./index.css"
 
 const root = document.getElementById("root");
 

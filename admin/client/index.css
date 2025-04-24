@@ -1,0 +1,361 @@
+/* Basic styling for the entire login page container */
+.login-page {
+    max-width: 400px; /* Limit the maximum width of the form */
+    margin: 50px auto; /* Center the div horizontally and add top margin */
+    padding: 30px;
+    background-color: #ffffff; /* White background */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    font-family: sans-serif; /* Use a common sans-serif font */
+  }
+  
+  /* Style the main heading */
+  .login-page h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333; /* Dark grey color */
+  }
+  
+  /* Style the form elements */
+  .login-page form {
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack elements vertically */
+  }
+  
+  /* Style the labels */
+  .login-page label {
+    margin-bottom: 8px; /* Space between label and input */
+    font-weight: bold;
+    color: #555; /* Medium grey color */
+  }
+  
+  /* Style the input fields */
+  .login-page input[type="text"],
+  .login-page input[type="password"] {
+    padding: 10px;
+    margin-bottom: 15px; /* Space below input fields */
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 4px; /* Slightly rounded input corners */
+    font-size: 1rem;
+  }
+  
+  /* Style the container for the remember me checkbox and label */
+  .remember-me-div {
+    display: flex; /* Use flexbox to align checkbox and label */
+    align-items: center; /* Vertically align items */
+    margin-bottom: 15px; /* Space below the remember me section */
+  }
+  
+  .remember-me-div input[type="checkbox"] {
+    margin-right: 8px; /* Space between checkbox and label */
+  }
+  
+  /* Style the remember me label specifically if needed, though general label style applies */
+  .remember-me-div label {
+    margin-bottom: 0; /* Remove extra margin from the general label style */
+    font-weight: normal; /* Normal weight for the remember me label */
+  }
+  
+  
+  /* Style the status message paragraph */
+  /* The color is already set inline in the JSX, but you can add other styles here */
+  .login-page p {
+    margin-top: 0; /* Remove default top margin */
+    margin-bottom: 15px; /* Space below the status message */
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  
+  /* Style the login button */
+  .login-page button {
+    padding: 12px 20px;
+    background-color: #007bff; /* Primary blue color */
+    color: white; /* White text color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; /* Indicate it's clickable */
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+  }
+  
+  /* Style the button on hover */
+  .login-page button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  
+  /* If using Bootstrap classes btn and btn-wide along with custom styles */
+  /* Ensure these styles don't conflict, or override Bootstrap as needed */
+  .login-page .btn-wide {
+      width: 100%; /* Make the button take the full width */
+  }
+  
+  /* Add some focus styles for accessibility */
+  .login-page input:focus,
+  .login-page button:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+
+  /* Basic styling for the entire new object container */
+.new-object {
+    max-width: 600px; /* You might want a slightly wider container for more content */
+    margin: 0px auto; /* Center the div horizontally and add top margin */
+    padding: 10px;
+    background-color: #ffffff; /* White background */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    font-family: sans-serif; /* Use a common sans-serif font */
+  }
+  
+  /* Style the main heading */
+  .new-object h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333; /* Dark grey color */
+  }
+  
+  /* Style the paragraph elements (status messages, loading, no attributes) */
+  .new-object p {
+    margin-top: 0; /* Remove default top margin */
+    margin-bottom: 15px; /* Space below the paragraph */
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  /* Style the labels */
+  .new-object label {
+    display: block; /* Make labels block elements for better layout */
+    margin-bottom: 8px; /* Space between label and input */
+    font-weight: bold;
+    color: #555; /* Medium grey color */
+    margin-top: 15px; /* Add some space above the label */
+  }
+  
+  /* Style the input fields (text and textarea) */
+  .new-object input[type="text"],
+  .new-object textarea {
+    width: 100%; /* Make inputs take full width */
+    padding: 10px;
+    margin-bottom: 15px; /* Space below input fields */
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 4px; /* Slightly rounded input corners */
+    font-size: 1rem;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  }
+  
+  /* Adjust textarea height */
+  .new-object textarea {
+      min-height: 100px; /* Give the textarea a minimum height */
+      resize: vertical; /* Allow vertical resizing only */
+  }
+  
+  
+  /* Style containers holding buttons (for "OR/AND/()" and attribute buttons) */
+  .new-object div {
+      display: flex; /* Use flexbox to layout buttons horizontally */
+      flex-wrap: wrap; /* Allow buttons to wrap to the next line if needed */
+      gap: 10px; /* Space between buttons */
+      margin-bottom: 15px; /* Space below the button group */
+      align-items: center; /* Vertically align buttons */
+  }
+  
+  
+  /* Style all buttons within the new object section */
+  .new-object button {
+    padding: 8px 15px; /* Smaller padding for these buttons compared to the main action button */
+    background-color: #e9e9e9; /* Light grey background for smaller buttons */
+    color: #333; /* Dark text color */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer; /* Indicate it's clickable */
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease, border-color 0.3s ease; /* Smooth hover effect */
+  }
+  
+  /* Style the smaller buttons on hover */
+  .new-object button:hover {
+    background-color: #218838; /* Slightly darker grey on hover */
+    border-color: #bbb;
+  }
+  .new-object > button:last-child { /* Assuming the last button is always the main action button */
+    padding: 12px 20px;
+    background-color: #28a745; /* Green color for success/add action */
+    color: white;
+    border-color: #28a745;
+    font-size: 1.1rem;
+    margin-top: 20px; /* Add space above the main button */
+    width: 100%; /* Make the main button full width */
+}
+  
+  
+  /* Add some focus styles for accessibility */
+  .new-object input:focus,
+  .new-object textarea:focus,
+  .new-object button:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+
+  /* Basic styling for the entire list objects container */
+.list-objects {
+    max-width: 800px; /* Adjust max-width suitable for displaying multiple cards */
+    margin: 0px auto; /* Center the div horizontally and add top margin */
+    padding: 10px;
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    font-family: sans-serif; /* Use a common sans-serif font */
+  }
+  
+  /* Style the main heading */
+  .list-objects h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333; /* Dark grey color */
+  }
+  
+  /* Style the paragraph elements (status messages, loading, error, no objects) */
+  .list-objects p {
+    margin-top: 0; /* Remove default top margin */
+    margin-bottom: 15px; /* Space below the paragraph */
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  .list-objects p:first-child {
+    margin-top: 0; /* Remove default top margin */
+    margin-bottom: 15px; /* Space below the paragraph */
+    text-align: start;
+    font-size: 1.5rem;
+    font-weight: bolder;
+  }
+
+  .list-objects a{
+    color: #007bff;
+    cursor: pointer;
+
+  }
+  
+  
+  /* Style the container that wraps all the object cards */
+  .list-objects > div:not(:first-child) { /* Target the div directly within .list-objects that contains the mapped items, excluding the potential Show div */
+      display: grid; /* Use CSS Grid for a responsive card layout */
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Create responsive columns, min width 280px */
+      gap: 20px; /* Space between grid items (the cards) */
+      margin-top: 20px; /* Space above the list of cards */
+  }
+  
+  
+  /* Style each individual object card */
+  .list-objects > div > div { /* Target the inner divs which are the cards */
+    border: 1px solid #e0e0e0; /* Light grey border for the card */
+    border-radius: 8px; /* Rounded corners for the card */
+    padding: 20px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08); /* Subtle shadow for cards */
+    display: flex; /* Use flexbox within the card to arrange content */
+    flex-direction: column; /* Stack card content vertically */
+    justify-content: space-between; /* Space out content and push button to bottom */
+  }
+
+  .list-objects > div > .iot-connected{
+    background: #36c85867; 
+  }
+
+  .list-objects > div > .iot-not-connected{
+    background: #c8363667; 
+  }
+  
+  /* Style paragraphs within the cards */
+  .list-objects > div > div p {
+    text-align: left; /* Align text left within the card */
+    margin-bottom: 10px; /* Space between paragraphs within the card */
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  /* Remove bottom margin for the last paragraph in a card */
+  .list-objects > div > div p:last-of-type {
+      margin-bottom: 0;
+  }
+  
+  
+  /* Style the button within each card (the delete button) */
+  .list-objects > div > div button {
+    margin-top: 15px; /* Add space above the button */
+    padding: 8px 15px;
+    background-color: #dc3545; /* Red color for delete button */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+    align-self: flex-start; /* Align button to the left within the flex container */
+  }
+  
+  /* Style the delete button on hover */
+  .list-objects > div > div button:hover {
+    background-color: #c82333; /* Darker red on hover */
+  }
+  
+  
+  /* Add some focus styles for accessibility */
+  .list-objects button:focus {
+    outline: none;
+    border-color: #dc3545;
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.5); /* Reddish shadow for delete button focus */
+  }
+
+  /* Basic styling for the update UI container */
+.update-ui {
+    max-width: 400px; /* Similar width to the login form, as it's simple */
+    margin: 0px auto; /* Center the div horizontally and add top margin */
+    padding: 30px;
+    background-color: #ffffff; /* White background */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    font-family: sans-serif; /* Use a common sans-serif font */
+    text-align: center; /* Center content within the container */
+  }
+  
+  /* Style the main heading */
+  .update-ui h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333; /* Dark grey color */
+  }
+  
+  /* Style the paragraph element (status message) */
+  .update-ui p {
+    margin-top: 0; /* Remove default top margin */
+    margin-bottom: 20px; /* Space below the status message before the button */
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  /* Style the update button */
+  .update-ui button {
+    padding: 12px 20px;
+    background-color: #007bff; /* Primary blue color, consistent with login button */
+    color: white; /* White text color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; /* Indicate it's clickable */
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+    width: 100%; /* Make the button take the full width */
+  }
+  
+  /* Style the button on hover */
+  .update-ui button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  
+  /* Add some focus styles for accessibility */
+  .update-ui button:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }

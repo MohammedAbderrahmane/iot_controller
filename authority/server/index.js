@@ -10,11 +10,12 @@ const coap = require("coap");
 
 const MAABE_PUBLIC_PARAMETERS_PATH = "keys/maabe_public_parameters.json";
 const AUTHORITY_PATH = "keys/authority.json";
-const PORT = 2000;
+const PORT = 2001;
 
 const GO_CREATE_AUTHORITY_SCRIPT = "maabe/create_authority";
 const GO_ADD_ATTRIBUTE_SCRIPT = "maabe/add_attribute";
 const GO_RENEW_ATTRIBUTE_SCRIPT = "maabe/renew_attribute";
+const GO_GENERATE_KEYS_SCRIPT = "maabe/generate_keys";
 
 // ---------
 const app = express();
@@ -127,13 +128,13 @@ app.get("/api/authority/", (req, res) => {
 });
 
 app.get("/api/authority/send", (req, res) => {
-  const coapPayload = { ...authority, Sk: undefined };
+  const coapPayload = { ...authority, Sk: undefined, port: PORT };
 
   const coapRequest = coap.request({
     hostname: "192.168.1.100",
     pathname: "/attributes",
     method: "POST",
-    
+
   });
   coapRequest.setOption('Block1', Buffer.alloc(0x6))
   coapRequest.write(JSON.stringify(coapPayload));
@@ -183,20 +184,20 @@ app.post("/api/user/generate_keys", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password)
-    return response.status(400).json({ message: "Identifiants incomplets" });
+    return res.status(400).json({ message: "Identifiants incomplets" });
 
   const [results] = await db
     .promise()
     .query("SELECT * FROM User WHERE username = ? ;", [username]);
 
   if (results.length === 0)
-    return response.status(401).json({ message: "Identifiants invalides" });
+    return res.status(401).json({ message: "Identifiants invalides" });
 
   const user = results[0];
   const validPassword = await bcrypt.compare(password, user.password);
 
   if (!validPassword)
-    return response.status(401).json({ message: "Identifiants invalides" });
+    return res.status(401).json({ message: "Identifiants invalides" });
 
   const command = `${GO_GENERATE_KEYS_SCRIPT} ${username} ${user.attributes.replaceAll(
     "/",
@@ -205,16 +206,11 @@ app.post("/api/user/generate_keys", async (req, res) => {
   try {
     const output = execSync(command);
 
-    console.log(output);
-
-    const data = fs.readFileSync(AUTHORITY_PATH);
-    authority = JSON.parse(data);
-
     res.json(JSON.parse(output.toString()));
   } catch (error) {
     return res
       .status(400)
-      .send({ message: "failed to generete keys : " + error });
+      .json ({ message: "failed to generete keys : " + error });
   }
 });
 

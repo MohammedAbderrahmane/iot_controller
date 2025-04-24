@@ -1,5 +1,5 @@
 import axios from "axios";
-const base_URL = "http://192.168.1.12:2000/api";
+const base_URL = "/api";
 
 async function getAllObjects(params) {
   try {
@@ -19,10 +19,11 @@ async function getAllAttributes(params) {
   }
 }
 
-async function addObject(name, accessPolicy) {
+async function addObject(name,description, accessPolicy) {
   try {
     const response = await axios.post(`${base_URL}/objects`, {
       name,
+      description,
       accessPolicy,
     });
     return { ok: true, ...response.data };
