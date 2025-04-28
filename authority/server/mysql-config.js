@@ -1,12 +1,11 @@
 const mysql = require("mysql2");
-require("dotenv").config();
 
 // Configuration de la connexion à la base de données
 const config = {
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "compteur_db",
+  database: process.env.DB_NAME || "users_db",
 };
 
 console.log("Tentative de connexion à la base de données avec les paramètres :");

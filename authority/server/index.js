@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const fs = require("fs");
 const cors = require("cors");
@@ -6,11 +8,11 @@ const { execSync } = require("child_process");
 const db = require("./mysql-config.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const coap = require("coap");
+const axios = require("axios");
 
 const MAABE_PUBLIC_PARAMETERS_PATH = "keys/maabe_public_parameters.json";
 const AUTHORITY_PATH = "keys/authority.json";
-const PORT = 2001;
+const PORT = process.env.PORT || 2000;
 
 const GO_CREATE_AUTHORITY_SCRIPT = "maabe/create_authority";
 const GO_ADD_ATTRIBUTE_SCRIPT = "maabe/add_attribute";
@@ -127,23 +129,18 @@ app.get("/api/authority/", (req, res) => {
   });
 });
 
-app.get("/api/authority/send", (req, res) => {
-  const coapPayload = { ...authority, Sk: undefined, port: PORT };
-
-  const coapRequest = coap.request({
-    hostname: "192.168.1.100",
-    pathname: "/attributes",
-    method: "POST",
-
-  });
-  coapRequest.setOption('Block1', Buffer.alloc(0x6))
-  coapRequest.write(JSON.stringify(coapPayload));
-
-  coapRequest
-    .on("response", (res) => {
-      console.log("received response");
-    })
-    .end();
+app.get("/api/authority/send", async (req, res) => {
+  try {
+    await axios.post(`${process.env.SERVER_URL}/api/auths/`, {
+      ...authority,
+      Sk: undefined,
+      port: PORT,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .send({ message: "failed to send authority to server" });
+  }
 
   res.status(200).end();
 });
@@ -180,10 +177,32 @@ app.put("/api/authority/renew_attribute", (req, res) => {
   }
 });
 
-app.post("/api/user/generate_keys", async (req, res) => {
-  const { username, password } = req.body;
+app.delete("/api/authority/:attribute", (req, res) => {
+  const { attribute } = req.params;
+  try {
+    const data = fs.readFileSync(AUTHORITY_PATH);
+    const auth = JSON.parse(data);
 
-  if (!username || !password)
+    auth.Pk.attributes = auth.Pk.attributes.filter((e) => e != attribute);
+    auth.Pk.EggToAlpha[attribute] = undefined;
+    auth.Pk.GToY[attribute] = undefined;
+    auth.Sk.attributes = auth.Pk.attributes.filter((e) => e != attribute);
+    auth.Sk.Alpha[attribute] = undefined;
+    auth.Sk.Y[attribute] = undefined;
+
+    fs.writeFileSync(AUTHORITY_PATH, JSON.stringify(auth, null, 2));
+    authority = auth;
+    return res.status(204).end();
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send({ message: "failed to delete attribute" });
+  }
+});
+
+app.post("/api/users/generate_keys", async (req, res) => {
+  const { username } = req.body;
+
+  if (!username)
     return res.status(400).json({ message: "Identifiants incomplets" });
 
   const [results] = await db
@@ -194,10 +213,10 @@ app.post("/api/user/generate_keys", async (req, res) => {
     return res.status(401).json({ message: "Identifiants invalides" });
 
   const user = results[0];
-  const validPassword = await bcrypt.compare(password, user.password);
+  // const validPassword = await bcrypt.compare(password, user.password);
 
-  if (!validPassword)
-    return res.status(401).json({ message: "Identifiants invalides" });
+  // if (!validPassword)
+  //   return res.status(401).json({ message: "Identifiants invalides" });
 
   const command = `${GO_GENERATE_KEYS_SCRIPT} ${username} ${user.attributes.replaceAll(
     "/",
@@ -210,18 +229,13 @@ app.post("/api/user/generate_keys", async (req, res) => {
   } catch (error) {
     return res
       .status(400)
-      .json ({ message: "failed to generete keys : " + error });
+      .json({ message: "failed to generete keys : " + error });
   }
 });
 
-// app.delete("/api/authority/attribute", (req, res) => {}); // NOT SURE IF THIS SAFE
-// app.delete("/api/user/delete", (req, res) => {});
-// app.delete("/api/user/update", (req, res) => {});
-// app.delete("/api/user/add_attributes", (req, res) => {});
-// app.delete("/api/user/remove_attributes", (req, res) => {});
 // app.delete("/api/user/re_password", (req, res) => {});
 
-app.post("/api/user/new", async (req, res) => {
+app.post("/api/users/new", async (req, res) => {
   const { username, password, attributes } = req.body;
 
   if (!username || !password || !attributes || !attributes.length) {
@@ -248,6 +262,71 @@ app.post("/api/user/new", async (req, res) => {
     return res.status(200).end();
   }
   res.status(500).send({ message: "failed to insert user" });
+});
+
+app.delete("/api/users/:username/:attribute", async (req, res) => {
+  const { username, attribute } = req.params;
+
+  const [results1] = await db
+    .promise()
+    .query("SELECT * FROM User WHERE username = ? ;", [username]);
+
+  const user = results1[0];
+
+  const newAttributes = user.attributes
+    .split("/")
+    .filter((e) => e != attribute)
+    .join("/");
+
+  const results2 = await db
+    .promise()
+    .execute("UPDATE User SET attributes = ? WHERE username = ?", [
+      newAttributes,
+      username,
+    ]);
+
+  if (results2[0].affectedRows > 0) {
+    return res.status(200).end();
+  }
+  res.status(500).send({ message: "failed to delete user" });
+});
+
+app.put("/api/users/:username", async (req, res) => {
+  const { username } = req.params;
+  const { attribute } = req.body;
+
+  const [results1] = await db
+    .promise()
+    .query("SELECT * FROM User WHERE username = ? ;", [username]);
+
+  const user = results1[0];
+
+  const newAttributes = [...user.attributes.split("/"), attribute].join("/");
+
+  const results2 = await db
+    .promise()
+    .execute("UPDATE User SET attributes = ? WHERE username = ?", [
+      newAttributes,
+      username,
+    ]);
+
+  if (results2[0].affectedRows > 0) {
+    return res.status(200).end();
+  }
+  res.status(500).send({ message: "failed to delete user" });
+});
+
+app.delete("/api/users/:username", async (req, res) => {
+  const { username } = req.params;
+
+  const results = await db
+    .promise()
+    .execute("DELETE FROM User WHERE username = ?", [username]);
+
+  if (results[0].affectedRows > 0) {
+    return res.status(200).end();
+  }
+  res.status(500).send({ message: "failed to delete user" });
 });
 
 app.get("/api/users/all", async (req, res) => {
@@ -302,5 +381,24 @@ app.get("/api/admin/verify", async (request, response) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`authority server running on : http://localhost:${PORT}/`);
+  console.log("\t" + "POST" + "\t" + "/api/public_parameter/import");
+  console.log("");
+  console.log("\t" + "POST" + "\t" + "/api/authority/import");
+  console.log("\t" + "POST" + "\t" + "/api/authority/new");
+  console.log("\t" + "GET" + "\t" + "/api/authority/");
+  console.log("\t" + "GET" + "\t" + "/api/authority/send");
+  console.log("\t" + "POST" + "\t" + "/api/authority/new_attribute");
+  console.log("\t" + "PUT" + "\t" + "/api/authority/renew_attribute");
+  console.log("\t" + "DELETE" + "\t" + "/api/authority/:attribute");
+  console.log("");
+  console.log("\t" + "POST" + "\t" + "/api/users/generate_keys");
+  console.log("\t" + "POST" + "\t" + "/api/users/new");
+  console.log("\t" + "DELETE" + "\t" + "/api/users/:username/:attribute");
+  console.log("\t" + "DELETE" + "\t" + "/api/users/:username");
+  console.log("\t" + "PUT" + "\t" + "/api/users/:username");
+  console.log("\t" + "GET" + "\t" + "/api/users/all");
+  console.log("");
+  console.log("\t" + "POST" + "\t" + "/api/admin/login");
+  console.log("\t" + "GET" + "\t" + "/api/admin/verify");
 });

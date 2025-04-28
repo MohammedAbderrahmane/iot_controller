@@ -83,9 +83,18 @@ async function renewAttribute(attribute) {
   }
 }
 
+async function deleteAttribute(attribute) {
+  try {
+    const response = await axios.delete(`${base_URL}/authority/${attribute}`);
+    return { ok: true, ...response.data };
+  } catch (error) {
+    return { message: "failed : " + error.response?.data.message || error };
+  }
+}
+
 async function addUser(username, password, attributes) {
   try {
-    const response = await axios.post(`${base_URL}/user/new/`, {
+    const response = await axios.post(`${base_URL}/users/new`, {
       username,
       password,
       attributes,
@@ -119,7 +128,6 @@ async function verifySession(localAdmin, setAdmin) {
   try {
     await axios.get(`${base_URL}/admin/verify`, options);
 
-    console.log(localAdmin.authToken);
     setAdmin(localAdmin);
   } catch (error) {
     console.log(error);
@@ -144,7 +152,7 @@ export {
   importPublicParameters,
   importAuthority,
   createNewAuthority,
-  addAttribute,
+  addAttribute,deleteAttribute,
   renewAttribute,
   addUser,
   getUsers,

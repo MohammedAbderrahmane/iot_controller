@@ -195,14 +195,22 @@ func SaveAuthPublicKey(Pk *abe.MAABEPubKey, path string) []byte {
 	return jsonData
 }
 
+type E_JSON struct {
+	ID         string        `json:"ID"`
+	IP_ADDRESS string        `json:"host"`
+	PORT       int           `json:"port"`
+	Pk         *Auth_PK_JSON `json:"Pk"`
+}
+
 //export LoadAuthPublicKey
 func LoadAuthPublicKey(jsonData []byte) *abe.MAABEPubKey {
-	var pk Auth_PK_JSON
-	err := json.Unmarshal([]byte(jsonData), &pk)
+
+	var e E_JSON
+	err := json.Unmarshal([]byte(jsonData), &e)
 	if err != nil {
 		panic(err)
 	}
-
+	pk := e.Pk
 	EggToAlpha := make(map[string]*bn256.GT)
 	for key, value := range pk.EggToAlpha {
 		v := new(bn256.GT)
@@ -368,8 +376,6 @@ func SaveCyphertext(cyphertext *abe.MAABECipher) []byte {
 	if err != nil {
 		panic(err)
 	}
-
-	err = os.WriteFile("cyphertext.json", jsonData, 0644)
 	return jsonData
 }
 

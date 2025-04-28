@@ -1,3 +1,12 @@
+.page{
+  margin-left: 250px;
+  min-width: -moz-available;
+}
+
+.row {
+  display: flex;
+}
+
 h1{
   font-family: sans-serif; 
   font-size: 3rem;
@@ -431,21 +440,17 @@ h1{
 
 /* Basic styling for the send authority container */
 .send_auth {
-  max-width: 400px; /* Similar width to the update UI/login forms */
-  margin: 50px auto; /* Center the div horizontally and add top margin */
-  padding: 30px;
-  background-color: #ffffff; /* White background */
   border-radius: 8px; /* Rounded corners */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
   font-family: sans-serif; /* Use a common sans-serif font */
   text-align: center; /* Center content within the container */
+  color: wheat;
 }
 
 /* Style the main heading */
 .send_auth h2 {
   text-align: center;
   margin-bottom: 25px;
-  color: #333; /* Dark grey color */
 }
 
 /* Style the paragraph element (status message) */
@@ -482,10 +487,8 @@ h1{
 }
 
 /* Basic styling for the attributes container */
-.attributes {
+.attribute-div {
   max-width: 500px; /* Moderate width suitable for a list */
-  margin: 50px auto; /* Center the div horizontally and add top margin */
-  padding: 30px;
   background-color: #ffffff; /* White background */
   border-radius: 8px; /* Rounded corners */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
@@ -493,14 +496,14 @@ h1{
 }
 
 /* Style the main heading */
-.attributes h2 {
+.attribute-div h2 {
   text-align: center;
   margin-bottom: 25px;
   color: #333; /* Dark grey color */
 }
 
 /* Style the paragraph element ("No attributes defined yet.") */
-.attributes p {
+.attribute-div p {
   margin-top: 0;
   margin-bottom: 15px; /* Space below the paragraph */
   text-align: center;
@@ -509,14 +512,19 @@ h1{
 }
 
 /* Style the unordered list */
-.attributes ul {
+.attribute-div ul {
   list-style: none; /* Remove default bullet points */
   padding: 0; /* Remove default padding */
   margin: 0; /* Remove default margin */
 }
 
+.attribute-div ul div p{
+    word-break: break-all;
+  text-align: start;
+}
+
 /* Style each list item (attribute) */
-.attributes li {
+.attribute-div li {
   background-color: #f9f9f9; /* Slightly off-white background for list items */
   border: 1px solid #e0e0e0; /* Light grey border */
   border-radius: 4px; /* Slightly rounded corners */
@@ -528,22 +536,21 @@ h1{
 }
 
 /* Remove margin from the last list item */
-.attributes li:last-child {
+.attribute-div li:last-child {
   margin-bottom: 0;
 }
 
 
 /* Style the strong tag within list items */
-.attributes li strong {
+.attribute-div li strong {
   color: #333; /* Ensure the attribute text is dark */
   font-weight: bold; /* Keep it bold */
 }
 
 /* Basic styling for the create attribute container */
+
 .create-attribute {
-  max-width: 400px; /* Similar width to other simple forms */
-  margin: 50px auto; /* Center the div horizontally and add top margin */
-  padding: 30px;
+  width: 100%;
   background-color: #ffffff; /* White background */
   border-radius: 8px; /* Rounded corners */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
@@ -552,10 +559,10 @@ h1{
 }
 
 /* Style the main heading */
-.create-attribute h2 {
-  text-align: center;
-  margin-bottom: 25px;
+.create-attribute legend {
   color: #333; /* Dark grey color */
+  font-size: large;
+  font-weight: bold;
 }
 
 /* Style the paragraph element (status message) */
@@ -614,117 +621,50 @@ h1{
   border-color: #007bff; /* Blue focus border */
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Blue focus shadow */
 }
-
-/* Basic styling for the renew attribute container */
-.renew-attribute {
-  max-width: 400px; /* Similar width to other simple forms */
-  margin: 50px auto; /* Center the div horizontally and add top margin */
-  padding: 30px;
-  background-color: #ffffff; /* White background */
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  font-family: sans-serif; /* Use a common sans-serif font */
-  /* Elements will stack naturally */
+.righted{
+  margin-left: auto;
 }
-
-/* Style the main heading */
-.renew-attribute h2 {
-  text-align: center;
-  margin-bottom: 25px;
-  color: #333; /* Dark grey color */
+.renew-btn{
+    padding: 8px 12px; /* Smaller padding for attribute buttons */
+    /* Background color is handled inline */
+    color: black; /* White text for contrast with green/grey */
+    border: none; /* No border for a cleaner look with background color */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 0.3s ease
 }
-
-/* Style the paragraph element (status message) */
-.renew-attribute p {
-  margin-top: 0;
-  margin-bottom: 20px; /* Space below the status message */
-  text-align: center;
-  font-size: 0.9rem;
+.delete-btn{
+  margin: 5px; /* Add space around the buttons */
+    padding: 8px 12px; /* Smaller padding for attribute buttons */
+    background-color: #a72828;
+    color: white; /* White text for contrast with green/grey */
+    border: none; /* No border for a cleaner look with background color */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 0.3s ease
 }
-
-/* Style the label */
-.renew-attribute label {
-  display: block; /* Make labels block elements */
-  margin-bottom: 8px; /* Space between label and input */
-  font-weight: bold;
-  color: #555; /* Medium grey color */
-  margin-top: 15px; /* Space above the label */
-}
-
-/* Style the select dropdown */
-.renew-attribute select {
-  display: block; /* Make select block element */
-  width: 100%; /* Full width */
-  padding: 10px;
-  margin-bottom: 20px; /* Space below the select */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  box-sizing: border-box;
-  background-color: white; /* Ensure background is white */
-  cursor: pointer; /* Indicate it's interactive */
-  /* Appearance none helps with custom styling in some browsers */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  /* Add a custom arrow if needed, using background-image */
-  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.4-6.3H18.8c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
-  background-repeat: no-repeat;
-  background-position: right 10px top 50%;
-  background-size: 12px auto;
-  padding-right: 30px; /* Make space for the custom arrow */
-}
-
-/* Style the "renew Attribute" button */
-.renew-attribute button {
-  padding: 12px 20px;
-  background-color: #007bff; /* Primary blue color for renewing */
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1.1rem;
-  transition: background-color 0.3s ease;
-  width: 100%; /* Make the button full width */
-  margin-top: 10px; /* Space above the button */
-}
-
-/* Style the button on hover */
-.renew-attribute button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-}
-
-/* Add some focus styles for accessibility */
-.renew-attribute select:focus,
-.renew-attribute button:focus {
-  outline: none;
-  border-color: #007bff; /* Blue focus border */
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Blue focus shadow */
-}
-
 /* Basic styling for the new user container */
 .new-user {
-  max-width: 500px; /* Similar width to create authority form */
-  margin: 50px auto; /* Center the div horizontally and add top margin */
+  width: 95%;
   padding: 30px;
+  padding-top: 5px;
   background-color: #ffffff; /* White background */
   border-radius: 8px; /* Rounded corners */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
   font-family: sans-serif; /* Use a common sans-serif font */
   /* Elements will stack naturally */
 }
-
-/* Style the main heading */
-.new-user h2 {
-  text-align: center;
-  margin-bottom: 25px;
+.new-user legend {
   color: #333; /* Dark grey color */
+  font-size: large;
+  font-weight: bold;
 }
 
 /* Style the paragraph element (status message) */
 .new-user p {
   margin-top: 0;
-  margin-bottom: 20px; /* Space below the status message */
   text-align: center;
   font-size: 0.9rem;
 }
@@ -735,7 +675,6 @@ h1{
   margin-bottom: 8px; /* Space between label and input */
   font-weight: bold;
   color: #555; /* Medium grey color */
-  margin-top: 15px; /* Space above the label */
 }
 
 /* Style the input fields */
@@ -777,8 +716,7 @@ h1{
 /* Style the "add username" button (primary action) */
 .new-user button:last-child { /* Target the last button directly in .new-user */
   display: block; /* Make it a block element */
-  margin-top: 25px; /* Space above the button */
-  padding: 12px 20px;
+  padding: 10px 10px;
   background-color: #28a745; /* Green color for adding/creating */
   color: white;
   border: none;
@@ -811,8 +749,8 @@ h1{
 /* Basic styling for the list users container */
 .list-users {
   max-width: 800px; /* Similar width to the list objects */
-  margin: 50px auto; /* Center the div horizontally and add top margin */
   padding: 30px;
+  padding-top: 0;
   background-color: #ffffff; /* White background */
   border-radius: 8px; /* Rounded corners */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
@@ -966,4 +904,40 @@ font-weight: normal;
   background: #36c85867;
   display: inline;
   width: fit-content;
+}
+
+.user > div {
+  padding: 10px;
+  width: fit-content;
+  flex-basis: 100% 
+}
+
+.select-div {
+  width: 100%;
+  /* You can add more styling here for layout like flexbox or grid if needed */
+  display: flex; /* Example: to put select and button in a row */
+  gap: 10px; /* Example: add space between select and button */
+  align-items: center; /* Example: vertically align items */
+}
+
+.select-div select {
+  /* Basic styling for the select element */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex-grow: 1; /* Example: allow select to take up available space */
+}
+
+.select-div button {
+  /* Basic styling for the button element */
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.select-div button:hover {
+  background-color: #0056b3;
 }

@@ -9,15 +9,109 @@ from aiocoap.numbers.contentformat import ContentFormat
 from aiocoap.oscore_sitewrapper import *
 from aiocoap.oscore import *
 from aiocoap.transports.oscore import *
+import glob
+from dotenv import load_dotenv
 
 import subprocess
 MAABE_ENCRYPTOR_SCRIPT = "encryptor/maabe-encryptor"
+MAABE_AUTHS_PATH_PATTERN = "maabe-keys/auth_*_keys.json"
 
-iot_objects = {
-}
+load_dotenv()  # Loads from .env by default
 
-PORT = 5683
-IP_ADDRESS = "0.0.0.0"
+map_iot_objects = {}
+authorities = []
+
+PORT = int(os.getenv("PORT"))
+IP_ADDRESS = os.getenv("IP_ADDRESS")
+FOG_NAME = os.getenv("FOG_NAME")
+FOG_DESCRIPTION = os.getenv("FOG_DESCRIPTION")
+
+
+def notify_object_join (iot_object_id, ip_address, port):
+    server_url = os.getenv("SERVER_URL") + "/api/objects/" + iot_object_id
+    
+    import requests
+    
+    data = {
+    "port": port,
+    "ipAddress": ip_address,
+    }
+    
+    try:
+        response = requests.put(server_url, json=data)  
+        response.raise_for_status()
+        print("fog node is now notified")
+        return
+    except requests.exceptions.HTTPError as e:
+        print("fog node failed to notify server : ", e)
+    except requests.exceptions.RequestException as e:
+        print("fog node failed to notify server : ", e)
+
+
+def register_fog_node ():
+    server_url = os.getenv("SERVER_URL") + "/api/fognodes/"
+    
+    import hashlib
+    import requests
+
+    # Encode the string and hash it using SHA-256
+    fog_id = hashlib.sha256(FOG_NAME.encode()).hexdigest()[:10]
+
+    data = {
+    "port": PORT,
+    "id": fog_id,
+    "name": FOG_NAME,
+    "description": FOG_DESCRIPTION,
+    }
+    print("Regestring fog node :")
+    print(json.dumps(data, indent=2))
+    
+    try:
+        response = requests.post(server_url, json=data)
+        response.raise_for_status()
+        print("fog node is now registered")
+        return
+    except requests.exceptions.HTTPError as e:
+        print("fog node failed to register : ", e)
+    except requests.exceptions.RequestException as e:
+        print("fog node failed to register : ", e)
+    exit(1)
+
+
+def fetch_authorities ():
+    server_url = os.getenv("SERVER_URL") + "/api/auths/"
+    
+    import requests
+    try:
+        response = requests.get(server_url)
+        response.raise_for_status()
+        
+        e = response.json()
+        for item in e:
+            with open(f"maabe-keys/auth_{item['ID']}_keys.json", "w", encoding="utf-8") as file:
+                file.write(json.dumps(item))
+        
+        print("fog node retreived auths")
+        return
+    except requests.exceptions.HTTPError as e:
+        print("fog node failed to retreive auths : ", e)
+    except requests.exceptions.RequestException as e:
+        print("fog node failed to retreive auths : ", e)
+    
+    # TODO : fetch pk authorities from admin 
+    auths = []
+    for filepath in glob.glob(MAABE_AUTHS_PATH_PATTERN):
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+
+            new_entry = {
+                "ID": data["ID"],
+                "port": data["port"],
+                "host": data["host"]
+            }
+            auths.append(new_entry)
+    return auths
+
 
 def generateCypherText(message, access_policy_str):
     params = [message, access_policy_str]
@@ -27,108 +121,17 @@ def generateCypherText(message, access_policy_str):
     if result.returncode == 0:
         return result.stdout
     else:
-        exit(1)
+        return None
 
 
-class Welcome(Res.Resource):
-    representations = {
-        ContentFormat.TEXT: b"Welcome to the demo server",
-    }
-    default_representation = ContentFormat.TEXT
+# GET/POST/PUT
+class IoTObjects(Res.Resource):
 
-    async def render_get(self, request):
-        cf = (
-            self.default_representation
-            if request.opt.accept is None
-            else request.opt.accept
-        )
-
-        try:
-            return aiocoap.Message(payload=self.representations[cf], content_format=cf)
-        except KeyError:
-            raise aiocoap.error.UnsupportedContentFormat
-
-
-class WhoAmI(Res.Resource):
-
-    async def render_get(self, request):
-        return_text = []
-        return_text.append("Used protocol: %s." % request.remote.scheme)
-        return_text.append("Request came from %s." % request.remote.hostinfo)
-        return_text.append(
-            "The server address used %s." % 
-            request.remote.hostinfo_local
-        )
-        payload = "\n".join(return_text).encode("utf8")
-
-        return aiocoap.Message(content_format=ContentFormat.TEXT, payload=payload)
-
-
-class WithPayload(Res.Resource):
-
-    async def render_post(self, request):
-        payload = request.payload.decode('utf-8')
-
-        return_text = "received your payload and it is sent to you %s" % payload
-
-        return aiocoap.Message(content_format=ContentFormat.TEXT, payload=return_text.encode("utf8"))
-
-
-class Observable(Res.ObservableResource):
-
-    def __init__(self, time):
-        super().__init__()
-        self.time = time
-        self.handle = None
-        self.current_number = None
-
-    def notify(self):
-        self.current_number = str(random.randint(0, 100)).encode('utf-8')
-        # response = aiocoap.Message(payload=self.current_number)
-
-        self.updated_state()
-        print("sent %s" % self.current_number)
-        self.reschedule()
-
-    def reschedule(self):
-        self.handle = asyncio.get_event_loop().call_later(self.time, self.notify)
-
-    # count : number of observers
-    def update_observation_count(self, count):
-        if count and self.handle is None:
-            print("Starting observations")
-
-            self.current_number = str(random.randint(0, 100)).encode('utf-8')
-            self.reschedule()
-        if count == 0 and self.handle:
-            print("Stopping observations as there are no observers")
-
-            self.handle.cancel()
-            self.handle = None
-
-    async def render_get(self, request):
-        if self.current_number is None:
-            self.current_number = str(random.randint(0, 100)).encode('utf-8')
-        return aiocoap.Message(payload=self.current_number)
-
-
-class ObjectToken(Res.Resource):
-
-    async def render_post(self, request):
-        payload = request.payload.decode('utf-8')
-
-        if iot_objects.get(payload) == None:
-            return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=tokenCyphered.encode("utf8"))
-        tokenCyphered = iot_objects.get(payload).get("encrypted_token")
-        return aiocoap.Message(content_format=ContentFormat.TEXT, payload=tokenCyphered.encode("utf8"))
-
-
-class AllObject(Res.Resource):
-
+    # get all IoT objects from fog node
     async def render_get(self, request):
         iot_array = []
 
-        for name, info in iot_objects.items():
+        for name, info in map_iot_objects.items():
             device = {"name": name}
             device.update(info)
             iot_array.append(device)
@@ -137,40 +140,45 @@ class AllObject(Res.Resource):
         
         return aiocoap.Message(content_format=ContentFormat.TEXT, payload=response_payload.encode("utf8"))
 
-    async def render_post(self,request):
+    # admin enter a new IoT object
+    async def render_post(self, request):
         payload = request.payload.decode('utf-8')   
-        if payload == None:
-            return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"payload empty")
-
         try:
             import json
-            object_map = json.loads(request.payload)
+            object_map = json.loads(payload)
 
         except Exception as e:
+            print(f"Failled to add the IoT object : wrong format")
             return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"failed to parse data")
-
-        iot_objects[object_map["name"]] = {
-            **iot_objects.get(object_map["name"], {}),
-            "access_policy": object_map["accessPolicy"]
+        
+        map_iot_objects[object_map["name"]] = {
+            "access_policy": object_map["accessPolicy"],
+            "description": object_map["description"]
         }
-        print(iot_objects)
+        print(f"adding the IoT object : {object_map['name']} from the admin")
+        print(f"\taccess policy: {object_map['accessPolicy']}")
+        print(f"\tdescription: {object_map['description']}")
+
         return aiocoap.Message(content_format=ContentFormat.TEXT, payload="ACK".encode("utf8"))
 
+    # admin delete a IoT object
     async def render_put(self, request):
         object_id = request.payload.decode('utf-8')  
+        print(f"deleting the IoT object : {object_id} from the fog node")
 
-        del iot_objects[object_id]
+        del map_iot_objects[object_id]
         return aiocoap.Message(content_format=ContentFormat.TEXT, payload="ACK".encode("utf8"))
 
                 
 class ObjectRegister(Res.Resource):
 
+    # IoT object register itself
     async def render_post(self, request):
         object_id = request.payload.decode('utf-8')
-        
 
-        print (object_id)
-        if "access_policy" not in iot_objects.get(object_id, {}) or iot_objects[object_id]["access_policy"] is None:
+        print(f"Reveived request from IoT object : {object_id}")
+        if "access_policy" not in map_iot_objects.get(object_id, {}) or map_iot_objects[object_id]["access_policy"] is None:
+            print(f"no access policy defined for {object_id} -> 400:BAD_REQUEST")
             return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"object is not yet defined")
 
         import secrets
@@ -178,112 +186,51 @@ class ObjectRegister(Res.Resource):
 
         cyphertext = generateCypherText(
             token,
-            iot_objects[object_id]['access_policy']
+            map_iot_objects[object_id]['access_policy']
         )
-        iot_objects[object_id]['encrypted_token'] =       cyphertext
-        iot_objects[object_id]['ip_address'] = request.remote.hostinfo
-        iot_objects[object_id]['port'] = "5683"                        
+        map_iot_objects[object_id]['encrypted_token'] = cyphertext
+        map_iot_objects[object_id]['ip_address'] = request.remote.hostinfo
+        map_iot_objects[object_id]['port'] = "5683"
+        
+        notify_object_join(object_id, request.remote.hostinfo, "5683")
+        
+        print(f"\t--- token of {object_id}---")
+        print(token)
+        print(f"\t---encrypted token of {object_id}---")
+        print(cyphertext)
+        print("\t------")
 
         return aiocoap.Message(content_format=ContentFormat.TEXT,
                                 code=aiocoap.CREATED,
                                 payload=token.encode())
 
-class AllAttributes(Res.Resource):
-
-    async def render_get(self, request):
-
-        import glob
-        
-        all_attributes = []
-        search_path = os.path.join("maabe-keys", "auth_*.json")
-
-        matching_files = glob.glob(search_path)
-
-        if not matching_files:
-            response_payload = json.dumps(all_attributes)
-            return aiocoap.Message(content_format=ContentFormat.JSON, payload=response_payload.encode("utf8"))
-        for file_path in matching_files:
-            try:
-                if not os.path.isfile(file_path):
-                    continue
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    attributes_list = data.get("attributes")                
-                    all_attributes.extend(attributes_list)
-            except Exception:
-                continue
-        response_payload = json.dumps(all_attributes)
-        return aiocoap.Message(content_format=ContentFormat.JSON, payload=response_payload.encode("utf8"))
-
-    async def render_post(self,request):
-        payload = request.payload.decode('utf-8')   
-        if payload == None:
-            return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"payload empty")
-
-        try:
-            import json
-            new_auth = json.loads(request.payload)
-
-        except Exception as e:
-            return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"failed to parse data")
-        
-        with open(f"maabe-keys/auth_{new_auth['ID']}_keys.json", 'w') as f:
-            json.dump(new_auth["Pk"], f, indent=4)
-
-
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger("coap-server.oscore-site").setLevel(logging.DEBUG)
-
 
 async def main():
 
-    from aiocoap.credentials import CredentialsMap
-
-    credentials_dict = {
-        "coap://192.168.1.100/*": {
-            "oscore": {
-                "basedir": "./oscore_context"
-            }
-        },
-    }
-
-    # Create and load credentials map
-    credentials = CredentialsMap()
-    credentials.load_from_dict(credentials_dict)
-
     root = Res.Site()
-    root_secured = OscoreSiteWrapper(root, credentials)
 
-    root.add_resource([], Welcome())
-    root.add_resource(["whoami"], WhoAmI())
-    root.add_resource(["withpayload"], WithPayload())
+    root.add_resource(["objects"], IoTObjects())
     root.add_resource(["register"], ObjectRegister())
-    root.add_resource(["objects"], ObjectToken())
-    root.add_resource(["objects", "all"], AllObject())
-    root.add_resource(["observable"], Observable(1))
-    root.add_resource(["attributes"], AllAttributes())
 
     coap_context = await aiocoap.Context.create_server_context(
-        root_secured, bind=(IP_ADDRESS, PORT)
+        root, bind=(IP_ADDRESS, PORT)
     )
 
-    print(f"server running at : coap://{IP_ADDRESS}:{PORT}")
-    print("\tGET\t/")
-    print("\tGET\t/whoami")
-    print("\tGET\t/observable")
-    print("\tPOST\t/withpayload")
-    print("\tPOST\t/objects")
-    print("\tGET\t/objects/all")
-    print("\tPOST\t/objects/all")
-    print("\tPUT\t/objects/all")
-    print("\tPOST\t/register")
-    print("\tGET\t/attributes")
-    print("\tPOST\t/attributes")
+    print(f"\nFog node running at: coap://{IP_ADDRESS}:{PORT}\n")
+
+    print("Available Endpoints:")
+    print(f"{'METHOD':<8} {'ENDPOINT':<20} DESCRIPTION")
+    print("-" * 50)
+    print(f"{'GET':<8} {'/objects':<20} Get all IoT objects")
+    print(f"{'POST':<8} {'/objects':<20} Create new IoT object")
+    print(f"{'PUT':<8} {'/objects':<20} Update existing IoT object")
+    print(f"{'POST':<8} {'/register':<20} Register new IoT object")
 
     # Run forever
     await asyncio.get_running_loop().create_future()
 
 
 if __name__ == "__main__":
-
+    register_fog_node()
+    authorities = fetch_authorities()
     asyncio.run(main())

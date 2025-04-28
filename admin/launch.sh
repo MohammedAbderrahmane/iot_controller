@@ -1,5 +1,5 @@
 #!/bin/bash
-DEV_COMMAND="npm run dev" &
+DEV_COMMAND="npm run dev"
 
 cd server
 $DEV_COMMAND &
