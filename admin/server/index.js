@@ -68,13 +68,21 @@ app.post("/api/fognodes/", async (request, response) => {
     id,
     name,
     description,
-    ipAddress: request.ip,
+    ipAddress: request.ip.replace("::ffff:",""),
   });
   response.status(201).end();
 });
 
 app.get("/api/fognodes/", async (request, response) => {
   response.status(200).json(fogNodes);
+});
+
+app.get("/api/fognodes/objects", async (request, response) => {
+  const nodes = [...fogNodes]
+  for (const node of nodes){
+    node.iotObjects = iotObjects.filter(iot=>iot.nodeId  == node.id)
+  }
+  response.status(200).json(nodes);
 });
 
 app.get("/api/fognodes/:id", async (request, response) => {
@@ -93,7 +101,7 @@ app.delete("/api/fognodes/:id", async (request, response) => {
 
 // ---
 app.get("/api/auths", async (request, response) => {
-  response.json(authorities);
+  response.json(authorities); 
 });
 
 app.get("/api/auths/info", async (request, response) => {
@@ -111,7 +119,7 @@ app.get("/api/auths/attributes", async (request, response) => {
 app.post("/api/auths/", async (request, response) => {
   const { ID, Pk, port } = request.body;
 
-  const newAuth = { ID, Pk, port, host: request.ip };
+  const newAuth = { ID, Pk, port, host: request.ip.replace("::ffff:","") };
 
   fs.writeFileSync(
     `auths/auth_${ID}_keys.json`,
@@ -139,7 +147,7 @@ app.post("/api/objects", async (request, response) => {
 
   try {
     // FIXME : the coap message cant be confirmed if it arrived
-    await util.registerIoTObjectOnFognode(iotObject, fogNode);
+    await util.registerIoTObjectOnFognode(iotObject, fogNode);      
   } catch (error) {
     console.log(error);
     return response

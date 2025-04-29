@@ -30,15 +30,28 @@ export default function AuthoritiesPage(params) {
           <div>
             {auths().map((auth) => {
               return (
-                <div>
-                  <p>{auth.ID}</p>
-                  <p>url : {`http://${auth.host}:${auth.port}/`}</p>
-                  <ul>
-                    {auth.Pk.attributes.map((attr) => {
-                      return <li>{attr}</li>;
-                    })}
-                  </ul>
-                </div>
+                <table class="auth-table">
+                  <tbody>
+                    <tr>
+                      <td>ID:</td>
+                      <td>{auth.ID}</td>
+                    </tr>
+                    <tr>
+                      <td>url:</td>
+                      <td>{`http://${auth.host}:${auth.port}/`}</td>
+                    </tr>
+                    <tr>
+                      <td rowSpan={auth.Pk.attributes.length + 1}>
+                        Attributes:
+                      </td>
+                    </tr>
+                    {auth.Pk.attributes.map((attr, index) => (
+                      <tr>
+                        <td>{attr}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               );
             })}
           </div>

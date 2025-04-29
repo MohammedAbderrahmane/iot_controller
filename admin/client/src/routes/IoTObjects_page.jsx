@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
 import { createResource } from "solid-js";
-import { getIoTObjects } from "../service/objects_service";
+import { deleteIoTObject, getIoTObjects, updateIoTObject } from "../service/objects_service";
 
 export default function IoTObjectPage(params) {
   const [iotObjects, { mutate, refetch }] = createResource(() =>
@@ -105,73 +105,97 @@ export default function IoTObjectPage(params) {
               });
 
               return (
-                <div
+                <table
                   class={
-                    !!iot.ipAddress ? "iot-connected" : "iot-not-connected"
+                    "object-table " +
+                    (!!iot.ipAddress ? "iot-connected" : "iot-not-connected")
                   }
                 >
-                  <p>{iot.name}</p>
-                  <p style={{ color: status().good ? "green" : "red" }}>
-                    {status().message}
-                  </p>
-                  <span>fog node : {iot.nodeId}</span>
-                  <span>object desciption :</span>
-                  <input
-                    value={iot.description}
-                    disabled={isUpdating() != index}
-                    onChange={(e) => {
-                      setDescription(e.target.value);
-                    }}
-                  />
-                  <span>object access policy :</span>
-                  <textarea
-                    value={iot.accessPolicy}
-                    disabled={isUpdating() != index}
-                    onChange={(e) => {
-                      setAccessPolicy(e.target.value);
-                    }}
-                  />
-                  {iot.ipAddress && (
-                    <>
-                      <p>
-                        object url :
-                        <a>
-                          coap://{iot.ipAddress}:{iot.port}/
-                        </a>
-                      </p>
-                    </>
-                  )}
-                  <div>
-                    <button
-                      class="btn-delete"
-                      onClick={() => handleDelete(iot.name, seStatus)}
-                    >
-                      delete
-                    </button>
-                    <button
-                      onClick={() =>
-                        setIsUpdating(isUpdating() == index ? -1 : index)
-                      }
-                    >
-                      {isUpdating() != index ? "update" : "stop updating"}
-                    </button>
-                    {isUpdating() == index && (
-                      <button
-                        class="btn-config"
-                        onClick={() =>
-                          handleUpdate(
-                            iot.name,
-                            description(),
-                            accessPolicy(),
-                            seStatus
-                          )
-                        }
-                      >
-                        confirm update
-                      </button>
+                  <tbody>
+                    <tr>
+                      <td colSpan={2}>{iot.name}</td>
+                    </tr>
+                    <tr> {/* FIXME */}
+                      <td colSpan={2} style={{ color: status().good ? "green" : "red" }}>
+                        {status().message}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>fog node:</td>
+                      <td>{iot.nodeId}</td>
+                    </tr>
+
+                    <tr>
+                      <td>object desciption:</td>
+                      <td>
+                        <input
+                          type="text"
+                          value={iot.description}
+                          disabled={isUpdating() !== index}
+                          onChange={(e) => {
+                            setDescription(e.target.value);
+                          }}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>object access policy:</td>
+                      <td>
+                        <textarea
+                          value={iot.accessPolicy}
+                          disabled={isUpdating() !== index}
+                          onChange={(e) => {
+                            setAccessPolicy(e.target.value);
+                          }}
+                        />
+                      </td>
+                    </tr>
+                    {iot.ipAddress && (
+                      <tr>
+                        <td>object url:</td>
+                        <td>
+                          <a>
+                            coap://{iot.ipAddress}:{iot.port}/
+                          </a>
+                        </td>
+                      </tr>
                     )}
-                  </div>
-                </div>
+                    <tr>
+                      <td colSpan="2">
+                        <button
+                          className="btn-delete"
+                          onClick={() => handleDelete(iot.name, seStatus)}
+                        >
+                          delete
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            setIsUpdating(isUpdating() === index ? -1 : index)
+                          }
+                        >
+                          {isUpdating() !== index ? "update" : "stop updating"}
+                        </button>
+                        {isUpdating() === index && (
+                          <button
+                            className="btn-config"
+                            onClick={() =>
+                              handleUpdate(
+                                iot.name,
+                                description(),
+                                accessPolicy(),
+                                seStatus
+                              )
+                            }
+                          >
+                            confirm update
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               );
             })}
           </div>

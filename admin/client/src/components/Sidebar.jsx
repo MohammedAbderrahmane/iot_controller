@@ -11,29 +11,38 @@ function Sidebar(params) {
   return (
     <div className={`sidebar ${isCollapsed() ? "collapsed" : ""}`}>
       <div className="sidebar-header">
-        {!isCollapsed() && <h2>Admin dashboard</h2>}
+        {!isCollapsed() && (
+          <a href="/">
+            <h2>Admin dashboard</h2>
+          </a>
+        )}
         <button className="toggle-btn" onClick={toggleSidebar}>
-          {isCollapsed() ? ">" : "<"}
+          <img
+            class={"icon-on-dark" + (isCollapsed() ? " img-inversed" : "")}
+            src="left-arrows.png"
+            width="30"
+          />
         </button>
       </div>
 
       <ul className="sidebar-nav">
         <li className={`nav-item active`}>
           <a href="/fognodes">
+            <img src="cloud.png" />
             {!isCollapsed() && <span className="nav-text">Fog nodes</span>}
-            {isCollapsed() && <span className="nav-text">F</span>}
           </a>
         </li>
         <li className={`nav-item`}>
           <a href="/auths">
+            <img src="auction.png" />
             {!isCollapsed() && <span className="nav-text">Authorities</span>}
-            {isCollapsed() && <span className="nav-text">A</span>}
           </a>
         </li>
         <li className={`nav-item`}>
           <a href="/objects">
+            <img src="iot.png" />
+
             {!isCollapsed() && <span className="nav-text">IoT objects</span>}
-            {isCollapsed() && <span className="nav-text">O</span>}
           </a>
         </li>
       </ul>

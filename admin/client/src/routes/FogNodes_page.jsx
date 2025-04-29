@@ -29,24 +29,43 @@ export default function FogNodesPage(params) {
           <div>
             {nodes().map((node) => {
               return (
-                <div>
-                  <p>{node.name}</p>
-                  <p>node desciption : {node.description}</p>
-                  <p>node id : {node.id}</p>
-                  {node.ipAddress && (
-                    <>
-                      <p>
-                        object url :
-                        <a>
-                          coap://{node.ipAddress}:{node.port}/
-                        </a>
-                      </p>
-                    </>
-                  )}
-                  <button className="btn-config" onClick={() => navigate(`/fognodes/${node.id}`)}>
-                    configure
-                  </button>
-                </div>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>Name:</td>
+                      <td>{node.name}</td>
+                    </tr>
+                    <tr>
+                      <td>Description:</td>
+                      <td>{node.description}</td>
+                    </tr>
+                    <tr>
+                      <td>ID:</td>
+                      <td>{node.id}</td>
+                    </tr>
+                    {node.ipAddress && (
+                      <tr>
+                        <td>Object URL:</td>
+                        <td>
+                          {/* Anchor tag for the URL */}
+                          <a href={`coap://${node.ipAddress}:${node.port}/`}>
+                            coap://{node.ipAddress}:{node.port}/
+                          </a>
+                        </td>
+                      </tr>
+                    )}
+                    <tr>
+                      <td colSpan="2">
+                        <button
+                          className="btn-config"
+                          onClick={() => navigate(`/fognodes/${node.id}`)}
+                        >
+                          configure
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               );
             })}
           </div>
