@@ -1,4 +1,3 @@
-import android.content.Intent
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +5,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.iot_controller.ExhaustFan_Activity
 import com.iot_controller.Model.IoTObject
 import com.iot_controller.R
 
