@@ -106,7 +106,7 @@ def fetch_authorities ():
 
             new_entry = {
                 "ID": data["ID"],
-                "port": data["port"],
+                "port": str(data["port"]),
                 "host": data["host"]
             }
             auths.append(new_entry)
@@ -127,19 +127,6 @@ def generateCypherText(message, access_policy_str):
 # GET/POST/PUT
 class IoTObjects(Res.Resource):
 
-    # get all IoT objects from fog node
-    async def render_get(self, request):
-        iot_array = []
-
-        for name, info in map_iot_objects.items():
-            device = {"name": name}
-            device.update(info)
-            iot_array.append(device)
-            
-        response_payload = json.dumps(iot_array)
-        
-        return aiocoap.Message(content_format=ContentFormat.TEXT, payload=response_payload.encode("utf8"))
-
     # admin enter a new IoT object
     async def render_post(self, request):
         payload = request.payload.decode('utf-8')   
@@ -152,7 +139,7 @@ class IoTObjects(Res.Resource):
             return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"failed to parse data")
         
         map_iot_objects[object_map["name"]] = {
-            "access_policy": object_map["accessPolicy"],
+            "accessPolicy": object_map["accessPolicy"],
             "description": object_map["description"]
         }
         print(f"adding the IoT object : {object_map['name']} from the admin")
@@ -177,32 +164,49 @@ class ObjectRegister(Res.Resource):
         object_id = request.payload.decode('utf-8')
 
         print(f"Reveived request from IoT object : {object_id}")
-        if "access_policy" not in map_iot_objects.get(object_id, {}) or map_iot_objects[object_id]["access_policy"] is None:
-            print(f"no access policy defined for {object_id} -> 400:BAD_REQUEST")
+        if "accessPolicy" not in map_iot_objects.get(object_id, {}) or map_iot_objects[object_id]["accessPolicy"] is None:
+            print(f"no access policy defined for {object_id}")
             return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"object is not yet defined")
 
         import secrets
         token = secrets.token_urlsafe(32)
 
+
         cyphertext = generateCypherText(
             token,
-            map_iot_objects[object_id]['access_policy']
+            map_iot_objects[object_id]['accessPolicy']
         )
-        map_iot_objects[object_id]['encrypted_token'] = cyphertext
-        map_iot_objects[object_id]['ip_address'] = request.remote.hostinfo
+        map_iot_objects[object_id]['encryptedToken'] = cyphertext
+        map_iot_objects[object_id]['ipAddress'] = request.remote.hostinfo
         map_iot_objects[object_id]['port'] = "5683"
         
         notify_object_join(object_id, request.remote.hostinfo, "5683")
         
-        print(f"\t--- token of {object_id}---")
+        print(f"\t--- token of {object_id} ---")
         print(token)
-        print(f"\t---encrypted token of {object_id}---")
+        print(f"\t--- encrypted token of {object_id} ---")
         print(cyphertext)
         print("\t------")
 
         return aiocoap.Message(content_format=ContentFormat.TEXT,
                                 code=aiocoap.CREATED,
                                 payload=token.encode())
+
+     # get IoT object from fog node
+    
+    async def render_put(self, request):
+        selected_iot_name = request.payload.decode('utf-8')
+        iot_array = []
+
+        response_payload = ""
+        for name, info in map_iot_objects.items():
+            if selected_iot_name == name:
+                response_payload = map_iot_objects[name]["encryptedToken"]
+
+        if response_payload == "":
+            return aiocoap.Message(content_format=ContentFormat.TEXT, code=aiocoap.BAD_REQUEST, payload=b"object not found in fog node")
+        
+        return aiocoap.Message(content_format=ContentFormat.TEXT, payload=response_payload.encode("utf8"))
 
 
 async def main():
@@ -221,10 +225,10 @@ async def main():
     print("Available Endpoints:")
     print(f"{'METHOD':<8} {'ENDPOINT':<20} DESCRIPTION")
     print("-" * 50)
-    print(f"{'GET':<8} {'/objects':<20} Get all IoT objects")
     print(f"{'POST':<8} {'/objects':<20} Create new IoT object")
     print(f"{'PUT':<8} {'/objects':<20} Update existing IoT object")
     print(f"{'POST':<8} {'/register':<20} Register new IoT object")
+    print(f"{'PUT':<8} {'/register':<20} Get the token if an IoT object")
 
     # Run forever
     await asyncio.get_running_loop().create_future()

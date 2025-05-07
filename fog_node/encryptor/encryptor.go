@@ -198,7 +198,7 @@ func SaveAuthPublicKey(Pk *abe.MAABEPubKey, path string) []byte {
 type E_JSON struct {
 	ID         string        `json:"ID"`
 	IP_ADDRESS string        `json:"host"`
-	PORT       int           `json:"port"`
+	PORT       string        `json:"port"`
 	Pk         *Auth_PK_JSON `json:"Pk"`
 }
 
