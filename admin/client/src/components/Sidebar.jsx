@@ -45,6 +45,12 @@ function Sidebar(params) {
             {!isCollapsed() && <span className="nav-text">IoT objects</span>}
           </a>
         </li>
+        <li className={`nav-item`}>
+          <a href="/users">
+            <img src="team.png" />
+            {!isCollapsed() && <span className="nav-text">Users</span>}
+          </a>
+        </li>
       </ul>
     </div>
   );

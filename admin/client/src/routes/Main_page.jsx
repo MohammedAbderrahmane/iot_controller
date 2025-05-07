@@ -35,6 +35,16 @@ function MainPage() {
             </div>
           </a>
         </div>
+
+        <div class="card">
+          <a href="/users ">
+            <img src="team.png" />
+            <div class="card-content">
+              <h3>Users</h3>
+              <p>Manage the users of the authority</p>
+            </div>
+          </a>
+        </div>
       </div>
     </div>
   );

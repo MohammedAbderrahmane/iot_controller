@@ -9,6 +9,7 @@ import Sidebar from "./components/Sidebar";
 import FogNodePage from "./routes/FogNode_page";
 import AuthoritiesPage from "./routes/Authorities_page";
 import IoTObjectPage from "./routes/IoTObjects_page";
+import UsersPage from "./routes/User_page";
 
 function App() {
   const [admin, setAdmin] = useContext(AdminContext);
@@ -32,6 +33,7 @@ function App() {
             <Route path="/fognodes" component={FogNodesPage} />
             <Route path="/fognodes/:id" component={FogNodePage  } />
             <Route path="/auths" component={AuthoritiesPage  } />
+            <Route path="/users" component={UsersPage} />
             <Route path="/objects" component={IoTObjectPage  } />
           </>
         ) : (
