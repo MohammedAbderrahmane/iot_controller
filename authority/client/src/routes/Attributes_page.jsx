@@ -134,8 +134,18 @@ function AddAttribute(params) {
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
       </p>
-      <label for="name">Attribute Name:</label>
-      <input type="text" onChange={handleChange} />
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <label for="name">Attribute Name:</label>
+            </td>
+            <td>
+              <input type="text" onChange={handleChange} />
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <button onClick={handleUpload}>Add Attribute</button>
     </fieldset>
   );

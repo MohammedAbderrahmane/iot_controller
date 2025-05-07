@@ -1,10 +1,14 @@
 import { createResource, createSignal } from "solid-js";
 import { addUser, getAuthority, getUsers } from "../service/service";
-import { addUserAttribute, deleteUser, deleteUserAttribute } from "../service/user_service";
+import {
+  addUserAttribute,
+  deleteUser,
+  deleteUserAttribute,
+} from "../service/user_service";
 import { Show } from "solid-js";
 
 export default function UsersPage(params) {
-  const [users] = createResource(async () => getUsers());
+  const [users, { refetch }] = createResource(async () => getUsers());
   const [info] = createResource(async () => await getAuthority());
 
   const handleRemoveUser = async (username, seStatus) => {
@@ -14,6 +18,7 @@ export default function UsersPage(params) {
         good: true,
         message: "user deleted successfully",
       });
+      setTimeout(() => refetch(), 1500);
       return;
     }
     seStatus({ good: false, message: result.message || "unknown error" });
@@ -26,6 +31,7 @@ export default function UsersPage(params) {
         good: true,
         message: "attribute deleted from user successfully",
       });
+      setTimeout(() => refetch(), 1500);
       return;
     }
     seStatus({ good: false, message: result.message || "unknown error" });
@@ -38,6 +44,7 @@ export default function UsersPage(params) {
         good: true,
         message: "attribute add to user successfully",
       });
+      setTimeout(() => refetch(), 1500);
       return;
     }
     seStatus({ good: false, message: result.message || "unknown error" });
@@ -56,7 +63,10 @@ export default function UsersPage(params) {
         </Show>
 
         <Show when={info.state == "ready"}>
-          <NewUser attributes={info().authority.Pk.attributes} />
+          <NewUser
+            attributes={info().authority.Pk.attributes}
+            refetch={refetch}
+          />
         </Show>
       </fieldset>
 
@@ -73,7 +83,7 @@ export default function UsersPage(params) {
         {!users() ? (
           <p>No users</p>
         ) : (
-          <>
+          <div class="users">
             {users().map((user, index) => {
               const attrs = user.attributes.split("/");
 
@@ -121,22 +131,24 @@ export default function UsersPage(params) {
                   </div>
                   {action()[0] == index &&
                     (action()[1] == 0 ? (
-                        <div class="select-div">
+                      <div class="select-div">
                         <select onChange={(e) => setAttribute(e.target.value)}>
                           <option value="">Select an attribute</option>
                           {info().authority.Pk.attributes.map((attr) => (
                             <option value={attr}>{attr}</option>
                           ))}
                         </select>
-                        <button 
-                         onClick={() =>
+                        <button
+                          onClick={() =>
                             handleAddAttribute(
                               user.username,
                               attribute(),
                               seStatus
                             )
                           }
-                        >confim add</button>
+                        >
+                          confim add
+                        </button>
                       </div>
                     ) : (
                       <div class="select-div">
@@ -162,7 +174,7 @@ export default function UsersPage(params) {
                 </div>
               );
             })}
-          </>
+          </div>
         )}
       </Show>
     </div>
@@ -170,6 +182,7 @@ export default function UsersPage(params) {
 }
 
 function NewUser(params) {
+  const { refetch } = params;
   const [attributes, setAttributes] = createSignal(params.attributes);
   const [toggleAttributes, setToggleAttributes] = createSignal({});
   const [username, setUsername] = createSignal(null);
@@ -189,6 +202,7 @@ function NewUser(params) {
         good: true,
         message: "attribute added successfully",
       });
+      setTimeout(() => refetch(), 1500);
       return;
     }
     seStatus({ good: false, message: result.message || "unknown error" });
@@ -205,20 +219,38 @@ function NewUser(params) {
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
       </p>
-      <label for="name">username:</label>
-      <input
-        onChange={(e) => {
-          setUsername(e.target.value);
-        }}
-        type="text"
-      />
-      <label for="name">password:</label>
-      <input
-        onChange={(e) => {
-          setPassword(e.target.value);
-        }}
-        type="text"
-      />
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <label for="name">username:</label>
+            </td>
+            <td>
+              <input
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
+                type="text"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <label for="name">password:</label>
+            </td>
+            <td>
+              <input
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+                type="text"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
       {attributes().map((attr) => (
         <button
           onClick={(e) => {

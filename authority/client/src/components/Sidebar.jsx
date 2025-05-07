@@ -1,6 +1,5 @@
 import { createSignal } from "solid-js";
 import "./Sidebar.css";
-import { sendAuthority } from "../service/service.js";
 
 function Sidebar(params) {
   const [isCollapsed, setIsCollapsed] = createSignal(false);
@@ -12,23 +11,31 @@ function Sidebar(params) {
   return (
     <div className={`sidebar ${isCollapsed() ? "collapsed" : ""}`}>
       <div className="sidebar-header">
-        {!isCollapsed() && <h2>Admin dashboard</h2>}
+        {!isCollapsed() && (
+          <a href="/">
+            <h2>Admin dashboard</h2>
+          </a>
+        )}
         <button className="toggle-btn" onClick={toggleSidebar}>
-          {isCollapsed() ? ">" : "<"}
+          <img
+            class={"icon-on-dark" + (isCollapsed() ? " img-inversed" : "")}
+            src="left-arrows.png"
+            width="30"
+          />
         </button>
       </div>
 
       <ul className="sidebar-nav">
         <li className={`nav-item active`}>
           <a href="/attributes">
+            <img src="tag.png" />
             {!isCollapsed() && <span className="nav-text">Attributes</span>}
-            {isCollapsed() && <span className="nav-text">F</span>}
           </a>
         </li>
         <li className={`nav-item`}>
           <a href="/users">
+            <img src="team.png" />
             {!isCollapsed() && <span className="nav-text">Users</span>}
-            {isCollapsed() && <span className="nav-text">U</span>}
           </a>
         </li>
       </ul>

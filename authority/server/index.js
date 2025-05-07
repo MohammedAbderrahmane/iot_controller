@@ -134,7 +134,7 @@ app.get("/api/authority/send", async (req, res) => {
     await axios.post(`${process.env.SERVER_URL}/api/auths/`, {
       ...authority,
       Sk: undefined,
-      port: PORT,
+      port:`${PORT}`,
     });
   } catch (error) {
     return res
