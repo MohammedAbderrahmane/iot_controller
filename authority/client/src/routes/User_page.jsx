@@ -3,6 +3,8 @@ import { addUser, getAuthority, getUsers } from "../service/service";
 import {
   addUserAttribute,
   deleteUser,
+  addAllUsers,
+  updateUserAttribute,
   deleteUserAttribute,
 } from "../service/user_service";
 import { Show } from "solid-js";
@@ -53,21 +55,8 @@ export default function UsersPage(params) {
   return (
     <div class="page list-users">
       <fieldset class="new-user">
-        <legend>Create a new user</legend>
-        <Show when={info.loading}>
-          <p>Loading attributes...</p>
-        </Show>
-
-        <Show when={info.error}>
-          <p style={{ color: "red" }}>Error: {users.error.message}</p>
-        </Show>
-
-        <Show when={info.state == "ready"}>
-          <NewUser
-            attributes={info().authority.Pk.attributes}
-            refetch={refetch}
-          />
-        </Show>
+        <legend>Get users from admin</legend>
+        <GetUsers refetch={refetch} />
       </fieldset>
 
       <h2>list of users</h2>
@@ -85,58 +74,137 @@ export default function UsersPage(params) {
         ) : (
           <div class="users">
             {users().map((user, index) => {
-              const attrs = user.attributes.split("/");
+              const [attrs, setAttrs] = createSignal([]);
+
+              if (user.attributes.length) {
+                setAttrs(user.attributes.split("/"));
+              }
 
               const [status, seStatus] = createSignal({
                 good: false,
                 message: "",
               });
+              const [toggleAttributes, setToggleAttributes] = createSignal({});
+
               const [attribute, setAttribute] = createSignal(null);
               const [action, setAction] = createSignal([-1, -1]);
+
+              const handleUpload = async () => {
+                const toggled = toggleAttributes();
+
+                const validAttributes = Object.entries(toggled)
+                  .filter(([key, value]) => value)
+                  .map((tgl) => tgl[0]);
+                console.log(validAttributes);
+
+                const result = await updateUserAttribute(
+                  user.username,
+                  validAttributes
+                );
+                if (result.ok) {
+                  seStatus({
+                    good: true,
+                    message: "attribute added successfully",
+                  });
+                  setTimeout(() => refetch(), 1500);
+                  return;
+                }
+                seStatus({
+                  good: false,
+                  message: result.message || "unknown error",
+                });
+              };
+
+              const toggle = (attr) => {
+                setToggleAttributes((prev) => {
+                  return { ...prev, [attr]: !prev[attr] };
+                });
+              };
 
               return (
                 <div class="user">
                   <p>{user.username}</p>
-                  {attrs.map((attr) => (
-                    <span>{attr}</span>
-                  ))}
+                  {attrs().length ? (
+                    attrs().map((attr) => <span>{attr}</span>)
+                  ) : (
+                    <p>User have no attributes</p>
+                  )}
                   <p style={{ color: status().good ? "green" : "red" }}>
                     {status().message}
                   </p>
-                  <div>
-                    <button
-                      class="renew-btn"
-                      onClick={() => {
-                        setAction([index, 0]);
-                      }}
-                    >
-                      add attribute
-                    </button>
-                    {attrs.length > 1 && (
+                  {attrs().length ? (
+                    <div>
                       <button
-                        class="delete-btn"
+                        class="renew-btn"
                         onClick={() => {
-                          setAction([index, 1]);
+                          setAction([index, 0]);
                         }}
                       >
-                        remove attribute
+                        add attribute
                       </button>
-                    )}
-                    <button
-                      class="delete-btn"
-                      onClick={() => handleRemoveUser(user.username, seStatus)}
-                    >
-                      remove user
-                    </button>
-                  </div>
+                      {attrs().length > 1 && (
+                        <button
+                          class="delete-btn"
+                          onClick={() => {
+                            setAction([index, 1]);
+                          }}
+                        >
+                          remove attribute
+                        </button>
+                      )}
+                      <button
+                        class="delete-btn"
+                        onClick={() =>
+                          handleRemoveUser(user.username, seStatus)
+                        }
+                      >
+                        remove user
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <Show when={info.loading}>
+                        <p>Loading attributes...</p>
+                      </Show>
+
+                      <Show when={info.error}>
+                        <p style={{ color: "red" }}>
+                          Error: {users.error.message}
+                        </p>
+                      </Show>
+
+                      <Show when={info.state == "ready"}>
+                        {info().authority.Pk.attributes.map((attr) => (
+                          <button
+                            onClick={(e) => {
+                              toggle(attr);
+                            }}
+                            style={{
+                              background: toggleAttributes()[attr]
+                                ? "green"
+                                : "grey",
+                            }}
+                          >
+                            {attr}
+                          </button>
+                        ))}
+                        <button onClick={handleUpload}>add attributes</button>
+                      </Show>
+                    </div>
+                  )}
+
                   {action()[0] == index &&
                     (action()[1] == 0 ? (
                       <div class="select-div">
                         <select onChange={(e) => setAttribute(e.target.value)}>
                           <option value="">Select an attribute</option>
-                          {info().authority.Pk.attributes.map((attr) => (
-                            <option value={attr}>{attr}</option>
-                          ))}
+                          {info()
+                            .authority.Pk.attributes.filter(
+                              (attr) => !attrs().includes(attr)
+                            )
+                            .map((attr) => (
+                              <option value={attr}>{attr}</option>
+                            ))}
                         </select>
                         <button
                           onClick={() =>
@@ -154,7 +222,7 @@ export default function UsersPage(params) {
                       <div class="select-div">
                         <select onChange={(e) => setAttribute(e.target.value)}>
                           <option value="">Select an attribute</option>
-                          {attrs.map((attr) => (
+                          {attrs().map((attr) => (
                             <option value={attr}>{attr}</option>
                           ))}
                         </select>
@@ -181,22 +249,12 @@ export default function UsersPage(params) {
   );
 }
 
-function NewUser(params) {
+function GetUsers(params) {
   const { refetch } = params;
-  const [attributes, setAttributes] = createSignal(params.attributes);
-  const [toggleAttributes, setToggleAttributes] = createSignal({});
-  const [username, setUsername] = createSignal(null);
-  const [password, setPassword] = createSignal(null);
   const [status, seStatus] = createSignal({ good: false, message: "" });
 
   const handleUpload = async () => {
-    const toggled = toggleAttributes();
-
-    const validAttributes = Object.entries(toggled)
-      .filter(([key, value]) => value)
-      .map((tgl) => tgl[0]);
-
-    const result = await addUser(username(), password(), validAttributes);
+    const result = await addAllUsers();
     if (result.ok) {
       seStatus({
         good: true,
@@ -208,60 +266,12 @@ function NewUser(params) {
     seStatus({ good: false, message: result.message || "unknown error" });
   };
 
-  const toggle = (attr) => {
-    setToggleAttributes((prev) => {
-      return { ...prev, [attr]: !prev[attr] };
-    });
-  };
-
   return (
     <>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
       </p>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <label for="name">username:</label>
-            </td>
-            <td>
-              <input
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                }}
-                type="text"
-              />
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <label for="name">password:</label>
-            </td>
-            <td>
-              <input
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                }}
-                type="text"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      {attributes().map((attr) => (
-        <button
-          onClick={(e) => {
-            toggle(attr);
-          }}
-          style={{ background: toggleAttributes()[attr] ? "green" : "grey" }}
-        >
-          {attr}
-        </button>
-      ))}
-      <button onClick={handleUpload}>add username</button>
+      <button onClick={handleUpload}>get users from admin</button>
     </>
   );
 }

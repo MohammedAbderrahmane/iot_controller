@@ -31,3 +31,26 @@ export async function addUserAttribute(username, attribute) {
     return { message: "failed : " + error.response?.data.message || error };
   }
 }
+
+export async function updateUserAttribute(username, attributes) {
+  try {
+    const response = await axios.put(
+      `${base_URL}/users/attributes/${username}`,
+      {
+        attributes,
+      }
+    );
+    return { ok: true, ...response.data };
+  } catch (error) {
+    return { message: "failed : " + error.response?.data.message || error };
+  }
+}
+
+export async function addAllUsers() {
+  try {
+    const response = await axios.get(`${base_URL}/users/admin`);
+    return { ok: true, ...response.data };
+  } catch (error) {
+    return { message: "failed : " + error.response?.data.message || error };
+  }
+}

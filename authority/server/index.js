@@ -5,10 +5,10 @@ const fs = require("fs");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const { execSync } = require("child_process");
-const db = require("./mysql-config.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
+const initializeDatabase = require("./mysql-config.js");
 
 const MAABE_PUBLIC_PARAMETERS_PATH = "keys/maabe_public_parameters.json";
 const AUTHORITY_PATH = "keys/authority.json";
@@ -18,6 +18,10 @@ const GO_CREATE_AUTHORITY_SCRIPT = "maabe/create_authority";
 const GO_ADD_ATTRIBUTE_SCRIPT = "maabe/add_attribute";
 const GO_RENEW_ATTRIBUTE_SCRIPT = "maabe/renew_attribute";
 const GO_GENERATE_KEYS_SCRIPT = "maabe/generate_keys";
+
+var db = null;
+const initDb = async () => (db = await initializeDatabase());
+initDb();
 
 // ---------
 const app = express();
@@ -134,7 +138,7 @@ app.get("/api/authority/send", async (req, res) => {
     await axios.post(`${process.env.SERVER_URL}/api/auths/`, {
       ...authority,
       Sk: undefined,
-      port:`${PORT}`,
+      port: `${PORT}`,
     });
   } catch (error) {
     return res
@@ -200,9 +204,9 @@ app.delete("/api/authority/:attribute", (req, res) => {
 });
 
 app.post("/api/users/generate_keys", async (req, res) => {
-  const { username } = req.body;
+  const { username, password } = req.body;
 
-  if (!username)
+  if (!username || !password)
     return res.status(400).json({ message: "Identifiants incomplets" });
 
   const [results] = await db
@@ -210,13 +214,21 @@ app.post("/api/users/generate_keys", async (req, res) => {
     .query("SELECT * FROM User WHERE username = ? ;", [username]);
 
   if (results.length === 0)
-    return res.status(401).json({ message: "Identifiants invalides" });
+    return res
+      .status(401)
+      .json({ message: "Identifiants invalides : username " });
 
   const user = results[0];
-  // const validPassword = await bcrypt.compare(password, user.password);
+  if (user.password != password)
+    return res
+      .status(401)
+      .json({ message: "Identifiants invalides : password" });
 
-  // if (!validPassword)
-  //   return res.status(401).json({ message: "Identifiants invalides" });
+  if (!user.attributes){
+    return res
+    .status(401)
+    .json({ message: "you have no keys"});
+  }
 
   const command = `${GO_GENERATE_KEYS_SCRIPT} ${username} ${user.attributes.replaceAll(
     "/",
@@ -232,8 +244,6 @@ app.post("/api/users/generate_keys", async (req, res) => {
       .json({ message: "failed to generete keys : " + error });
   }
 });
-
-// app.delete("/api/user/re_password", (req, res) => {});
 
 app.post("/api/users/new", async (req, res) => {
   const { username, password, attributes } = req.body;
@@ -316,6 +326,23 @@ app.put("/api/users/:username", async (req, res) => {
   res.status(500).send({ message: "failed to delete user" });
 });
 
+app.put("/api/users/attributes/:username", async (req, res) => {
+  const { username } = req.params;
+  const { attributes } = req.body;
+
+  const results2 = await db
+    .promise()
+    .execute("UPDATE User SET attributes = ? WHERE username = ?", [
+      attributes.join("/"),
+      username,
+    ]);
+
+  if (results2[0].affectedRows > 0) {
+    return res.status(200).end();
+  }
+  res.status(500).send({ message: "failed to update attributes" });
+});
+
 app.delete("/api/users/:username", async (req, res) => {
   const { username } = req.params;
 
@@ -334,9 +361,35 @@ app.get("/api/users/all", async (req, res) => {
     .promise()
     .execute("SELECT username,attributes FROM User");
 
-  const users = Object.entries(rows).map((user) => user[1]);
+  const users = rows.map((user) => ({
+    username: user.username,
+    attributes: user.attributes || [],
+  }));
 
   res.status(200).json(users);
+});
+
+app.get("/api/users/admin", async (req, res) => {
+  const users = await axios.get(`${process.env.SERVER_URL}/api/users/auth`, {
+    headers: { authority: authority.ID },
+  });
+
+  console.log(users.data);
+  if (!users.data) {
+    res.status(500).send({ message: "failed to get users from server" });
+  }
+
+  await db.promise().execute("DELETE FROM User WHERE TRUE");
+
+  for (const user of users.data) {
+    await db
+      .promise()
+      .execute("INSERT INTO User (username,password) VALUES (?,?);", [
+        user.username,
+        user.password,
+      ]);
+  }
+  res.status(200).end();
 });
 
 // ---

@@ -32,11 +32,35 @@ async function initializeDatabase() {
           id INT AUTO_INCREMENT PRIMARY KEY,
           username VARCHAR(255) NOT NULL,
           password VARCHAR(255) NOT NULL,
-          changePassword BOOLEAN NOT NULL DEFAULT TRUE,
           date_creation TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
-  `);
+        `);
     console.log("✅ Table 'users' created.");
+    dbConnection.query(`
+    CREATE TABLE IF NOT EXISTS FogNode (
+      id            VARCHAR(255)      PRIMARY KEY,
+      name          VARCHAR(255)      NOT NULL,
+      description   TEXT              NOT NULL,
+      url           TEXT              NULL,
+      date_creation TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      date_entering TIMESTAMP         NULL
+    );
+      `);
+    console.log("✅ Table 'fognodes' created.");
+    dbConnection.query(`
+    CREATE TABLE IF NOT EXISTS IoTObject (
+      id            VARCHAR(255)      PRIMARY KEY,
+      fog_node      VARCHAR(255)      NOT NULL,
+      name          TEXT              NOT NULL,
+      description   TEXT              NOT NULL,
+      accessPolicy  TEXT              NOT NULL,
+      url           TEXT              NULL,
+      date_creation TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      date_entering   TIMESTAMP         NULL,
+      FOREIGN KEY (fog_node) REFERENCES FogNode(id)
+    );
+      `);
+    console.log("✅ Table 'iot_objects' created.");
 
     dbConnection.on("error", (err) => {
       console.error("MySQL Runtime Error:", err);
@@ -53,4 +77,4 @@ async function initializeDatabase() {
   }
 }
 
-module.exports = initializeDatabase
+module.exports = initializeDatabase;

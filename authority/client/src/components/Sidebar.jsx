@@ -1,5 +1,6 @@
 import { createSignal } from "solid-js";
 import "./Sidebar.css";
+import {sendAuthority} from "../service/service.js"
 
 function Sidebar(params) {
   const [isCollapsed, setIsCollapsed] = createSignal(false);

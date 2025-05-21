@@ -1,66 +1,55 @@
 const mysql = require("mysql2");
 
-// Configuration de la connexion à la base de données
-const config = {
+const dbConfig = {
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "users_db",
+  // database: process.env.DB_NAME || "users_db", // Database name is handled separately now
 };
+const dbName = process.env.DB_NAME || "users_db";
 
-console.log("Tentative de connexion à la base de données avec les paramètres :");
-console.log(`  - Host: ${config.host}`);
-console.log(`  - User: ${config.user}`);
-console.log(`  - Database: ${config.database}`);
+async function initializeDatabase() {
+  let connection;
+  try {
+    console.log(`Attempting to create MySQL db...`);
+    connection = mysql.createConnection(dbConfig);
+    console.log(`Ensuring database '${dbName}' exists...`);
+    connection.query(`CREATE DATABASE IF NOT EXISTS ${dbName};`);
+    console.log(`✅ Database '${dbName}' created.`);
+    connection.end();
 
-// Création de la connexion
-const db = mysql.createConnection(config);
+    console.log(`Connecting to database '${dbName}'...`);
+    const dbConnection = mysql.createConnection({
+      ...dbConfig,
+      database: dbName,
+    });
+    console.log(`✅ Successfully connected to MySQL`);
 
-// Établir la connexion
-db.connect((err) => {
-  if (err) {
-    console.error("Erreur de connexion à la base de données MySQL :");
-    console.error(`Code: ${err.code}`);
-    console.error(`Message: ${err.message}`);
-    
-    // Si la base de données n'existe pas, essayer de la créer
-    if (err.code === 'ER_BAD_DB_ERROR') {
-      console.log("Tentative de création de la base de données...");
-      const tempDb = mysql.createConnection({
-        host: config.host,
-        user: config.user,
-        password: config.password
-      });
-      
-      tempDb.query(`CREATE DATABASE IF NOT EXISTS ${config.database}`, (createErr) => {
-        if (createErr) {
-          console.error("Impossible de créer la base de données :", createErr);
-          process.exit(1);
-        }
-        console.log(`Base de données '${config.database}' créée avec succès.`);
-        console.log("Veuillez importer le schéma avec la commande :");
-        console.log(`mysql -u ${config.user} -p ${config.database} < database.sql`);
-        process.exit(0);
-      });
-    } else {
+    // 4. Create the table(s) if they don't exist
+    console.log("Ensuring table 'users' exists...");
+    dbConnection.query(`
+    CREATE TABLE IF NOT EXISTS User (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(255) NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      attributes TEXT
+    );
+  `);
+    console.log("✅ Table 'users' created.");
+
+    dbConnection.on("error", (err) => {
+      console.error("MySQL Runtime Error:", err);
       process.exit(1);
-    }
-  } else {
-    console.log("✅ Connecté avec succès à la base de données MySQL");
-  }
-});
+    });
 
-// Gestion des erreurs après la connexion initiale
-db.on('error', (err) => {
-  console.error('Erreur MySQL :', err);
-  
-  // Si la connexion est perdue, tenter de se reconnecter
-  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-    console.log('Tentative de reconnexion à la base de données...');
-    db.connect();
-  } else {
-    throw err;
+    // 5. Return the database-specific connection
+    return dbConnection;
+  } catch (err) {
+    console.error("❌ Database initialization failed:");
+    console.error(`   Code: ${err.code}`);
+    console.error(`   Message: ${err.message}`);
+    process.exit(1);
   }
-});
+}
 
-module.exports = db;
+module.exports = initializeDatabase

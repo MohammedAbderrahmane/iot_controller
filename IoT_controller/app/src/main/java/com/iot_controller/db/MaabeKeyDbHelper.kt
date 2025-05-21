@@ -16,7 +16,7 @@ object DbConstants {
     const val COLUMN_KEYS = "keys"
 }
 
-data class AuthEntry(
+data class MaabeKey(
     val authorityName: String,
     val keys: String
 )
@@ -54,7 +54,7 @@ class AuthorityDbHelper(context: Context) : SQLiteOpenHelper(
      * @param keysJson The keys as a JSON string.
      * @return The row ID of the newly inserted row, or -1 if an error occurred.
      */
-    fun insertAuthEntry(authorityName: String, keysJson: String): Long {
+    fun insertAuthEntry(authorityName: String, keysJson: String): MaabeKey {
         val db = this.writableDatabase
 
         val values = ContentValues().apply {
@@ -65,15 +65,15 @@ class AuthorityDbHelper(context: Context) : SQLiteOpenHelper(
         val newRowId = db.insert(DbConstants.TABLE_NAME, null, values)
 
         db.close()
-        return newRowId
+        return MaabeKey(authorityName,keysJson)
     }
 
     /**
      * Retrieves all authority entries from the database.
      * @return A list of AuthEntry objects.
      */
-    fun getAllAuthEntries(): ArrayList<AuthEntry> {
-        val entriesList = ArrayList<AuthEntry>()
+    fun getAllAuthEntries(): ArrayList<MaabeKey> {
+        val entriesList = ArrayList<MaabeKey>()
         val db = this.readableDatabase // Get the database in read mode
 
         // Define the columns you want to retrieve
@@ -97,7 +97,7 @@ class AuthorityDbHelper(context: Context) : SQLiteOpenHelper(
             while (it.moveToNext()) {
                 val name = it.getString(it.getColumnIndexOrThrow(DbConstants.COLUMN_AUTHORITY_NAME))
                 val keys = it.getString(it.getColumnIndexOrThrow(DbConstants.COLUMN_KEYS))
-                entriesList.add(AuthEntry(name,keys))
+                entriesList.add(MaabeKey(name,keys))
             }
         }
         db.close()

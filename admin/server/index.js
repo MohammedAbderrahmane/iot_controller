@@ -5,8 +5,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const coap = require("coap");
 const util = require("./utils.js");
+const crypto = require("crypto");
 
 require("dotenv").config();
+const fogNodeRouter = require("./controller/fognode_router.js");
+const iotObjectRouter = require("./controller/iot_object_router.js");
 const initializeDatabase = require("./mysql-config.js");
 
 const PORT = process.env.PORT;
@@ -22,7 +25,6 @@ app.use(cors());
 // ---
 var iotObjects = [];
 var authorities = [];
-var fogNodes = [];
 
 authorities = util.getAuthorities();
 
@@ -48,6 +50,10 @@ app.post("/api/admin/login", async (request, response) => {
   response.status(200).send(authToken);
 });
 
+app.use("/api/fognodes",fogNodeRouter)
+app.use("/api/objects",iotObjectRouter)
+
+
 app.get("/api/admin/verify", async (request, response) => {
   const authorization = request.get("authorization");
 
@@ -64,46 +70,6 @@ app.get("/api/admin/verify", async (request, response) => {
   }
 
   response.status(200).end();
-});
-
-// ---
-app.post("/api/fognodes/", async (request, response) => {
-  const { port, id, name, description } = request.body;
-  fogNodes.push({
-    port,
-    id,
-    name,
-    description,
-    ipAddress: request.ip.replace("::ffff:", ""),
-  });
-  console.log("\n--- New fog node registred ---\n");
-  response.status(201).end();
-});
-
-app.get("/api/fognodes/", async (request, response) => {
-  response.status(200).json(fogNodes);
-});
-
-app.get("/api/fognodes/objects", async (request, response) => {
-  const nodes = [...fogNodes];
-  for (const node of nodes) {
-    node.iotObjects = iotObjects.filter((iot) => iot.nodeId == node.id);
-  }
-  response.status(200).json(nodes);
-});
-
-app.get("/api/fognodes/:id", async (request, response) => {
-  const { id } = request.params;
-  const node = fogNodes.filter((e) => e.id == id);
-  const objects = iotObjects.filter((e) => e.nodeId == id);
-  if (node.length == 0) return response.status(200).json({});
-  response.status(200).json({ ...node[0], iotObjects: objects });
-});
-
-app.delete("/api/fognodes/:id", async (request, response) => {
-  const { id } = request.params;
-  fogNodes = fogNodes.filter((e) => e.id != id);
-  response.status(204).end();
 });
 
 // ---
@@ -139,137 +105,29 @@ app.post("/api/auths/", async (request, response) => {
 });
 
 // ---
-app.get("/api/objects", async (request, response) => {
-  response.json(iotObjects);
-});
-
-app.post("/api/objects", async (request, response) => {
-  const { nodeId, name, description, accessPolicy } = request.body;
-  const iotObject = {
-    nodeId,
-    name,
-    description,
-    accessPolicy,
-  };
-
-  const fogNode = fogNodes.filter((e) => e.id == nodeId)[0];
-
-  try {
-    // FIXME : the coap message cant be confirmed if it arrived
-    await util.registerIoTObjectOnFognode(iotObject, fogNode);
-  } catch (error) {
-    console.log(error);
-    return response
-      .status(500)
-      .send({ message: "object can't be registred on fog node" });
-  }
-  iotObjects.push(iotObject);
-
-  response.status(201).end();
-});
-
-app.put("/api/objects/:name", async (request, response) => {
-  const { name } = request.params;
-  const { description, accessPolicy, ipAddress, port } = request.body;
-
-  for (const iotObject of iotObjects) {
-    if (iotObject.name == name) {
-      iotObject.description = description || iotObject.description;
-      iotObject.accessPolicy = accessPolicy || iotObject.accessPolicy;
-      iotObject.ipAddress = ipAddress || iotObject.ipAddress;
-      iotObject.port = port || iotObject.port;
-
-      const fogNode = fogNodes.filter((e) => e.id == iotObject.nodeId)[0];
-
-      try {
-        // FIXME : the coap message cant be confirmed if it arrived
-        await util.registerIoTObjectOnFognode(
-          {
-            description: iotObject.description,
-            accessPolicy: iotObject.accessPolicy,
-            name: iotObject.name,
-          },
-          fogNode
-        );
-      } catch (error) {
-        console.log(error);
-        return response
-          .status(500)
-          .send({ message: "object can't be registred on fog node" });
-      }
-    }
-  }
-  response.status(200).end();
-});
-
-app.delete("/api/objects/:name", async (request, response) => {
-  const { name } = request.params;
-
-  iotObjects = iotObjects.filter((e) => e.name != name);
-  response.status(204).end();
-});
-
-app.delete("/api/objects/:name", async (request, response) => {
-  console.log(request.params);
-  const { name } = request.params;
-
-  const coapRequest = coap.request({
-    hostname: "192.168.1.100",
-    pathname: "/objects/all",
-    method: "PUT",
-  });
-  coapRequest.write(name);
-
-  coapRequest
-    .on("response", (res) => {
-      console.log("received response");
-    })
-    .end();
-
-  response.status(200).end();
-
-  coap
-    .request({
-      hostname: "192.168.1.100",
-      pathname: "/objects/all",
-      options: {
-        Accept: "application/json",
-      },
-    })
-    .on("response", (res) => {
-      iotObjects = JSON.parse(res.payload.toString());
-      for (var iot of iotObjects) {
-        iot.encrypted_token = undefined;
-      }
-      console.log("iot list received ");
-    })
-    .end();
-});
-
-// ---
 
 app.post("/api/users/new", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res
-      .status(400)
-      .json({ error: "username, password are required." });
+    return res.status(400).json({ error: "username, password are required." });
   }
 
-  try {
-    hashedPassword = bcrypt.hashSync(password, 10);
-  } catch (err) {
-    console.error("Password hashing failed:", err);
-    return res.status(400).json({ error: "Failed to process password." });
-  }
+  const N = 16384; // CPU/memory cost factor (must be power of 2, > 1)
+  const r = 8; // Block size factor
+  const p = 1; // Parallelization factor
+  const keylen = 64; // Desired length of the derived key in bytes
+
+  const hashedPassword = crypto
+    .scryptSync(password, username, keylen, { N, r, p })    
+    .toString("base64");
 
   const results = await db
     .promise()
-    .execute(
-      "INSERT INTO User (username,password) VALUES (?,?);",
-      [username, hashedPassword]
-    );
+    .execute("INSERT INTO User (username,password) VALUES (?,?);", [
+      username,
+      hashedPassword,
+    ]);
 
   if (results[0].affectedRows == 1) {
     return res.status(200).end();
@@ -277,56 +135,34 @@ app.post("/api/users/new", async (req, res) => {
   res.status(500).send({ message: "failed to insert user" });
 });
 
-app.post("/api/users/login", async (request, response) => {
-  const { username, password, rememberMe } = request.body;
-
-  if (!username || !password || !username.length || !password.length)
-    return response.status(401).send({ message: "Invalid credentials" });
-
-  const [results] = await db
-    .promise()
-    .query("SELECT * FROM User WHERE username = ? ;", [username]);
-
-  if (results.length === 0)
-    return response.status(401).json({ message: "Identifiants invalides" });
-
-  const user = results[0];
-
-  if (
-    !(username === user.username) ||
-    !bcrypt.compareSync(password, user.password)
-  )
-    return response.status(401).send({ message: "Invalid credentials" });
-
-  const authToken = jwt.sign({ username }, process.env.JWT_SECRET, {
-    expiresIn: rememberMe ? "7d" : "30m",
-  });
-
-  response.status(200).send(authToken);
-});
-
-app.get("/api/users/verify", async (request, response) => {
-  const authorization = request.get("authorization");
-
-  if (!authorization)
-    return response.status(401).send({ message: "no authorization provided" });
-
-  const authToken = authorization.replace("Bearer ", "");
-  try {
-    jwt.verify(authToken, process.env.JWT_SECRET);
-  } catch (error) {
-    if (error.expiredAt)
-      return response.status(401).send({ message: "session expired" });
-    return response.status(401).send({ message: "wrong credentials" });
-  }
-
-  response.status(200).end();
-});
-
 app.get("/api/users", async (req, res) => {
-  const [rows] = await db.promise().execute("SELECT username FROM User");
+  const [users] = await db.promise().execute("SELECT username,date_creation FROM User");
+  res.status(200).json(users);
+});
 
-  const users = Object.entries(rows).map((user) => user[1]);
+app.get("/api/users/auth", async (req, res) => {
+  const authority = req.get("authority");
+  const [users] = await db
+    .promise()
+    .execute("SELECT username,password FROM User");
+
+        const N = 16384; // CPU/memory cost factor (must be power of 2, > 1)
+        const r = 8; // Block size factor
+        const p = 1; // Parallelization factor
+        const keylen = 64; // Desired length of the derived key in bytes
+
+        
+        users.forEach(    
+          (user) =>{
+            console.log(user.password , authority.trim());
+            return (user.password = crypto  
+              .scryptSync(user.password, authority, keylen, {
+                N: N,
+                r: r,
+                p: p,
+              })
+              .toString("base64"))}
+        );
 
   res.status(200).json(users);
 });
@@ -366,9 +202,8 @@ app.listen(PORT, () => {
   console.log("\t" + "DELETE" + "\t" + "/api/objects/:name"); // MUST NOTIFY FOG NODE
   console.log("");
   console.log("\t" + "GET" + "\t" + "/api/users"); // MUST NOTIFY FOG NODE
+  console.log("\t" + "GET" + "\t" + "/api/users/auth");
   console.log("\t" + "POST" + "\t" + "/api/users/new"); // MUST NOTIFY FOG NODE
-  console.log("\t" + "POST" + "\t" + "/api/users/login"); // MUST NOTIFY FOG NODE
-  console.log("\t" + "GET" + "\t" + "/api/users/verify"); // MUST NOTIFY FOG NODE
   console.log("\t" + "DELETE" + "\t" + "/api/users/:username"); // MUST NOTIFY FOG NODE
   console.log("");
 });
