@@ -12,6 +12,7 @@ import java.lang.reflect.Type
 class IoTObject : Serializable {
     var ipAddress: String? = null
     var port: String? = null
+    var accessPolicy: String? = null
     var name: String
     var description: String
     var encryptedToken: String? = null
@@ -27,39 +28,45 @@ class IoTObject : Serializable {
 
             val name = jsonObj["name"].asString
             val description = jsonObj["description"].asString
-            if (jsonObj["ip_address"] == null) {
+            if (jsonObj["ipAddress"] == null) {
                 return IoTObject(
                     name = name,
                     descryption = description,
                 )
             }
-            val ipAddress = jsonObj["ip_address"].asString
+            val accessPolicy = jsonObj["accessPolicy"].asString
+            val ipAddress = jsonObj["ipAddress"].asString
             val port = jsonObj["port"].asString
-            val encryptedToken = jsonObj["encrypted_token"].asString
 
 
-            return IoTObject(
+            val iotObject = IoTObject(
                 port = port,
                 name = name,
                 ipAddress = ipAddress,
-                encryptedToken = encryptedToken,
                 descryption = description,
+                accessPolicy = accessPolicy,
             )
+
+            if (!jsonObj["encryptedToken"].isJsonNull) {
+                iotObject.encryptedToken = jsonObj["encryptedToken"].asString
+            }
+
+            return iotObject
         }
     }
 
     constructor(
-        port: String?,
         name: String,
-        ipAddress: String?,
-        encryptedToken: String?,
         descryption: String,
+        ipAddress: String?,
+        port: String?,
+        accessPolicy: String?,
     ) {
         this.port = port
         this.name = name
         this.ipAddress = ipAddress
         this.description = descryption
-        this.encryptedToken = encryptedToken
+        this.accessPolicy = accessPolicy
     }
 
     constructor(

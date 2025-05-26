@@ -5,72 +5,77 @@ import android.util.Log
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import com.iot_controller.Model.Authority
-import com.iot_controller.db.AuthEntry
-import com.iot_controller.db.AuthorityDbHelper
-import okhttp3.Cache
-import okhttp3.Call
+import com.iot_controller.db.MaabeKey
+import com.iot_controller.db.MaabeKeyDbHelper
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.eclipse.californium.core.CoapClient
+import org.eclipse.californium.core.coap.CoAP
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
-import kotlin.time.Duration
 
-
-fun loginToAuthority(
-    username: String,
-    password: String,
+fun retrieveAuthority(
+    userJson: JSONObject,
     url: String,
-): Call {
-    val client = OkHttpClient.Builder()
-        .connectTimeout(1L, TimeUnit.SECONDS)
-        .readTimeout(1L, TimeUnit.SECONDS)
-        .build()
-    val userJson = JSONObject()
-    userJson.put("username", username)
-    userJson.put("password", password)
+    authorityName: String,
+    context: Context,
+): MaabeKey {
+    val client = OkHttpClient.Builder().connectTimeout(1L, TimeUnit.SECONDS)
+        .readTimeout(1L, TimeUnit.SECONDS).build()
 
     val body = userJson.toString().toRequestBody("application/json".toMediaType())
+    val request = Request.Builder().url(url).post(body).build()
 
-    val request = Request.Builder()
-        .url(url)
-        .post(body)
-        .build()
-    return client.newCall(request)
+    client.newCall(request).execute().use { response ->
+        val responsePayload = response.body?.string()
+                
+        Log.e("e", responsePayload!!)
 
-}
+        if (!response.isSuccessful) {
+            val jsonResponse = JSONObject(responsePayload!!)
+            val errorMessage = jsonResponse.getString("message")
 
-val FOG_NODE_URL = "coap://192.168.1.100:5683/authorities"
+            throw Exception("Falled : ${errorMessage}")
+        }
 
-fun getAuthorities(): ArrayList<Authority> {
-    var authoritiesList = ArrayList<Authority>()
-    var authorityJson = ""
-    val coapClient = CoapClient(FOG_NODE_URL)
-    coapClient.setTimeout(500)
 
-    val response = coapClient.get()
-    if (response != null && response.isSuccess) {
-        authorityJson = response.payload.decodeToString()
-        Log.e("zzz",authorityJson)
-    } else {
-    Log.e("zzz",response.responseText)
-        return authoritiesList
+        val dbHelper = MaabeKeyDbHelper(context)
+        return dbHelper.insertAuthEntry(authorityName, responsePayload)
     }
-    coapClient.shutdown()
-
-    val gson = GsonBuilder()
-        .registerTypeAdapter(Authority::class.java, Authority.JSONDeserializer())
-        .create()
-
-    val jsonArray = JsonParser.parseString(authorityJson).asJsonArray
-    authoritiesList =
-        jsonArray.map { gson.fromJson(it, Authority::class.java) } as ArrayList<Authority>
-    return authoritiesList
 }
 
-fun getLogedInAuthorities(context: Context): ArrayList<AuthEntry> {
-    val dbHelper = AuthorityDbHelper(context)
+fun getAuthorities(fogNodeURI: String): ArrayList<Authority> {
+    var authoritiesList = ArrayList<Authority>()
+
+    val coapClient = CoapClient("${fogNodeURI}/authorities")
+    coapClient.setTimeout(2000)
+
+    val request = org.eclipse.californium.core.coap.Request(CoAP.Code.GET)
+
+    val response = coapClient.advanced(request)
+    if (response != null && response.isSuccess) {
+        var authorityJson = response.payload.decodeToString()
+        val gson =
+            GsonBuilder().registerTypeAdapter(Authority::class.java, Authority.JSONDeserializer())
+                .create()
+        val jsonArray = JsonParser.parseString(authorityJson).asJsonArray
+        authoritiesList =
+            jsonArray.map { gson.fromJson(it, Authority::class.java) } as ArrayList<Authority>
+        return authoritiesList
+    } else if (response == null) {
+        throw Exception("Failed to get authorities : Fog node didn't respond")
+    }
+    throw Exception("Failed to get authorities\n${response.responseText}")
+}
+
+fun getAssociatedAuthorities(context: Context): ArrayList<MaabeKey> {
+    val dbHelper = MaabeKeyDbHelper(context)
     return dbHelper.getAllAuthEntries()
+}
+
+fun deleteAssociatedAuthority(context: Context, authName: String): Boolean {
+    val dbHelper = MaabeKeyDbHelper(context)
+    return dbHelper.deleteAuthEntry(authName) == 1
 }

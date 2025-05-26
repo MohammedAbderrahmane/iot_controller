@@ -21,7 +21,7 @@ data class MaabeKey(
     val keys: String
 )
 
-class AuthorityDbHelper(context: Context) : SQLiteOpenHelper(
+class MaabeKeyDbHelper(context: Context) : SQLiteOpenHelper(
     context,
     DbConstants.DATABASE_NAME,
     null,
@@ -116,6 +116,18 @@ class AuthorityDbHelper(context: Context) : SQLiteOpenHelper(
         db.close()
         return deletedRows
     }
+
+    fun deleteAllAuthEntries(): Int {
+        val db = this.writableDatabase // Open database for writing
+        val deletedRows = db.delete(
+            DbConstants.TABLE_NAME, // Table name
+            null,                   // WHERE clause: null = no filter → delete all
+            null                    // WHERE arguments: also null
+        )
+        db.close()
+        return deletedRows
+    }
+
 
 
     // You can add more methods here for get by name, update, delete, etc.

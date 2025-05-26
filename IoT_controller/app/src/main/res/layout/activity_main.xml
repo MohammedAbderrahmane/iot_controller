@@ -7,104 +7,188 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <View
+        android:id="@+id/view2"
+        android:layout_width="32dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_color1"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:layout_editor_absoluteY="444dp" />
+
+
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar"
+        android:id="@+id/main_appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/topAppBar"
-            style="@style/Widget.MaterialComponents.Toolbar.Primary"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/main_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="IoT object controller" />
+
+            android:background="@color/color1"
+            android:elevation="4dp"
+            app:menu="@menu/main_menu"
+            app:title="Main page"
+            app:titleTextColor="@color/color3"/>
+
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/authority_recycle_view"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/a_main_connected_status"
+        android:layout_width="0dp"
+        android:paddingVertical="2dp"
         android:layout_height="wrap_content"
-        android:minHeight="100dp"
-        app:layout_constraintTop_toBottomOf="@+id/app_bar">
+        android:background="@color/warning"
+        android:fontFamily="@font/ubuntu_sans"
+        android:text="loading ..."
+        android:textAlignment="center"
+        android:textColor="@color/color1"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/view2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_appbar" />
 
-        <TextView
-            android:id="@+id/unused_7"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Liste of authorities :"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/text_main_logedin_auths"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="loged to 0 authority"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/unused_7" />
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/view2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_fog_node"
+        app:srcCompat="@drawable/profile" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycleview_authorities"
+    <TextView
+        android:id="@+id/text_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/ubuntu_sans"
+        android:text="Welcome mohammed"
+        android:textColor="@color/color3"
+        android:textSize="30dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/view2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+    <TextView
+        android:id="@+id/text_fog_node"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/ubuntu_sans"
+        android:text="fog node url : "
+        android:layout_marginTop="8dp"
+        android:textColor="@color/color1"
+        android:textSize="12dp"
+        android:layout_marginLeft="32dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/a_main_connected_status" />
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginBottom="32dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_user">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/a_btn_main_to_authorities_page"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/text_main_logedin_auths"
-            tools:layout_editor_absoluteX="4dp" />
+            android:layout_weight="1"
+            android:background="@drawable/bg_button_2"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="16dp">
 
-        <TextView
-            android:id="@+id/text_main_authorities_not_found"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="There is no authorities"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            <ImageView
+                android:id="@+id/card_icon1"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/auction"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
+            <TextView
+                android:id="@+id/card_text2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                android:fontFamily="@font/patrick_regular"
+                android:gravity="center_horizontal"
+                android:text="Authorities"
+                android:textColor="@color/color3"
+                android:textSize="30sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/card_icon1" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="100dp"
-        app:layout_constraintTop_toBottomOf="@+id/authority_recycle_view">
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="24dp" />
 
-        <TextView
-            android:id="@+id/unused_4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Liste of objects :"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycleview_iot"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/a_btn_main_to_iots_page"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/unused_4"
-            tools:layout_editor_absoluteX="4dp" />
+            android:layout_weight="1"
+            android:background="@drawable/bg_button_2"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="16dp">
 
-        <TextView
-            android:id="@+id/text_main_iot_not_found"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="There is no iot objects"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            <ImageView
+                android:id="@+id/card_icon2"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/iot"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
+            <TextView
+                android:id="@+id/card_tex2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                android:fontFamily="@font/patrick_regular"
+                android:gravity="center_horizontal"
+                android:text="IoT objects"
+                android:textColor="@color/color3"
+                android:textSize="30sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/card_icon2" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

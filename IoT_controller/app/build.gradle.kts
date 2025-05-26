@@ -64,7 +64,11 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.californium.core)
     implementation(libs.cf.oscore)
-    implementation("com.google.android.material:material:1.10.0")
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.material.v1100)
+    implementation(libs.gson)
     implementation(files("libs/maabe.aar"))
+
+    implementation(libs.circleimageview)
+    implementation("org.bouncycastle:bcprov-jdk18on:1.80")
+
 }

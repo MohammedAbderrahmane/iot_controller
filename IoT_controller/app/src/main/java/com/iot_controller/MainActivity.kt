@@ -1,47 +1,39 @@
 package com.iot_controller
 
-import IoTAdapter
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonParser
-import com.google.gson.reflect.TypeToken
-import com.iot_controller.Model.Authority
-import com.iot_controller.Model.IoTObject
-import com.iot_controller.RecycleViews.Compteur.AuthorityAdapter
-import com.iot_controller.Services.getAuthorities
-import com.iot_controller.Services.getLogedInAuthorities
-import com.iot_controller.db.AuthEntry
-import com.iot_controller.db.AuthorityDbHelper
-import org.eclipse.californium.core.CoapClient
-import org.eclipse.californium.core.coap.CoAP
-import org.eclipse.californium.core.coap.Request
+import com.iot_controller.db.MaabeKeyDbHelper
+import java.net.InetAddress
+import java.util.concurrent.Executors
+
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var sharedPref: SharedPreferences
 
-    var iotList: ArrayList<IoTObject> = ArrayList()
-    var authorityList: ArrayList<Authority> = ArrayList()
-    var localLogins: ArrayList<AuthEntry> = ArrayList<AuthEntry>()
 
     lateinit var rootLayout: View
-    lateinit var recycleview_iot: RecyclerView
-    lateinit var recycleview_authorities: RecyclerView
-    lateinit var text_main_iot_not_found: TextView
-    lateinit var text_main_authorities_not_found: TextView
-    lateinit var text_main_logedin_auths: TextView
+    lateinit var text_user: TextView
+    lateinit var text_connected_status: TextView
+    lateinit var text_fog_node: TextView
+    lateinit var btn_main_to_authorities_page: View
+    lateinit var btn_main_to_iots_page: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_main)) { v, insets ->
@@ -49,93 +41,121 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        val toolbar: Toolbar? = findViewById(R.id.main_toolbar)
+        setSupportActionBar(toolbar)
+
         rootLayout = findViewById(R.id.activity_main)
-        recycleview_iot = findViewById(R.id.recycleview_iot)
-        recycleview_authorities = findViewById(R.id.recycleview_authorities)
-        text_main_iot_not_found = findViewById(R.id.text_main_iot_not_found)
-        text_main_authorities_not_found = findViewById(R.id.text_main_authorities_not_found)
-        text_main_logedin_auths = findViewById(R.id.text_main_logedin_auths)
+        text_user = findViewById(R.id.text_user)
+        text_connected_status = findViewById(R.id.a_main_connected_status)
+        btn_main_to_authorities_page = findViewById(R.id.a_btn_main_to_authorities_page)
+        btn_main_to_iots_page = findViewById(R.id.a_btn_main_to_iots_page)
+        text_fog_node = findViewById(R.id.text_fog_node)
 
-        getIotObjects();
-        fillAuthorities();
+        sharedPref = this.getSharedPreferences("IoTController", MODE_PRIVATE)
 
+        pingFogNode()
 
-        if (iotList.isEmpty()) {
-            text_main_iot_not_found.visibility = View.VISIBLE
-            recycleview_iot.visibility = View.GONE
-        } else {
-            text_main_iot_not_found.visibility = View.GONE
-            recycleview_iot.visibility = View.VISIBLE
-
-            recycleview_iot.layoutManager = LinearLayoutManager(this)
-            recycleview_iot.adapter = IoTAdapter(iotList)
+        val username = sharedPref.getString("username", "")
+        if (username == null) {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
         }
+        text_user.text = "Welcome ${username}"
 
-
+        btn_main_to_authorities_page.setOnClickListener {
+            val intent = Intent(
+                this,
+                AuthoritiesActivity::class.java
+            )
+            startActivity(intent)
+        }
+        btn_main_to_iots_page.setOnClickListener {
+            val intent = Intent(
+                this,
+                IoTListActivity::class.java
+            )
+            startActivity(intent)
+        }
 
     }
 
-    fun fillAuthorities (){
-        Log.e("zzz","-------------------------")
-        try {
-            authorityList = getAuthorities()
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
 
-            Log.e("zzz",authorityList.size.toString())
-//            Log.e("zzz",authorityList.ame)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
 
-            localLogins = getLogedInAuthorities(this)
-            text_main_logedin_auths.text = "You are loged to ${localLogins.size} authority"
+        if (id == R.id.action_logout) {
+            val editor = sharedPref.edit()  
+            editor.clear()
+            editor.apply()
 
+            val dbHelper = MaabeKeyDbHelper(this)
+            dbHelper.deleteAllAuthEntries()
 
-            if (authorityList.isEmpty()) {
-                text_main_authorities_not_found.visibility = View.VISIBLE
-                recycleview_authorities.visibility = View.GONE
-            } else {
-                text_main_authorities_not_found.visibility = View.GONE
-                recycleview_authorities.visibility = View.VISIBLE
+            val intent = Intent(
+                this,
+                LoginActivity::class.java
+            )
+            startActivity(intent)
+            finish()
+            return true
+        } else if (id == R.id.action_out) {
+            finish()
+            return true
+        }
 
-                recycleview_authorities.layoutManager = LinearLayoutManager(this)
-                recycleview_authorities.adapter = AuthorityAdapter(authorityList, localLogins)
+        return super.onOptionsItemSelected(item)
+    }
+
+    fun pingFogNode() {
+        setConnectedStatus("connecting...", R.color.warning)
+        val executor = Executors.newSingleThreadExecutor()
+
+        val fogNodeURI = sharedPref.getString("fogNodeURI", "")
+        val fogNodeHost = sharedPref.getString("fogNodeHost", "")
+        if (fogNodeURI == null || fogNodeHost == null) {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+        }
+        Handler(Looper.getMainLooper()).post{
+            text_fog_node.text = "fog node uri = ${fogNodeURI}"
+        }
+
+        executor.execute {
+            try {
+                val address = InetAddress.getByName(fogNodeHost)
+                address.isReachable(3000)
+            } catch (e: Exception) {
+                Log.e("ping-error" , e.message.toString()   )
+                setConnectedStatus("Not connected", R.color.error)
+                return@execute
             }
+            setConnectedStatus("Connected", R.color.success)
 
-        } catch (error: Exception) {
-            text_main_authorities_not_found.text = error.message
         }
     }
 
-    private fun getIotObjects() {
-        try {
 
-            var ioTObjectsJson: String
-            var coapClient = CoapClient("coap://192.168.1.100:5683/objects/all")
-            coapClient.setTimeout(5000)
-
-            val request = Request(CoAP.Code.GET)
-
-            val response = coapClient.advanced(request)
-            if (response != null && response.isSuccess) {
-                ioTObjectsJson = response.payload.decodeToString()
-            } else return
-            coapClient.shutdown()
-
-
-            val gson = GsonBuilder()
-                .registerTypeAdapter(IoTObject::class.java, IoTObject.IoTObjectDeserializer())
-                .create()
-
-            val jsonArray = JsonParser.parseString(ioTObjectsJson).asJsonArray
-            iotList =
-                jsonArray.map { gson.fromJson(it, IoTObject::class.java) } as ArrayList<IoTObject>
-
-            Snackbar.make(rootLayout, "objects loaded : ${iotList.size}", Snackbar.LENGTH_SHORT)
-                .show()
-        } catch (exception: Exception) {
-            Log.e("zzz",exception.message.toString())
-            Snackbar.make(
-                rootLayout,
-                "Failed to get List : ${exception.message}",
-                Snackbar.LENGTH_SHORT
-            ).show()
+    private fun setConnectedStatus(
+        text: String,
+        color: Int = R.color.black,
+        durration: Long? = null,
+    ) {
+        Handler(Looper.getMainLooper()).post {
+            if (color != null) {
+                val chosenColor = resources.getColor(color, null)
+                text_connected_status.setBackgroundColor(chosenColor)
+            }
+            text_connected_status.text = text
+            if (durration != null) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    text_connected_status.text = ""
+                }, durration)
+            }
         }
     }
+
 }

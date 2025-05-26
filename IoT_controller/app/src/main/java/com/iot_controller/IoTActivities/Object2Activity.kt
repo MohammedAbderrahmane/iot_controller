@@ -1,4 +1,4 @@
-package com.iot_controller
+package com.iot_controller.IoTActivities
 
 import android.os.Bundle
 import android.widget.Button
@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.iot_controller.Model.IoTObject
+import com.iot_controller.R
 import com.iot_controller.Services.handleGetSpeed
 import com.iot_controller.Services.handleSetSpeed
 

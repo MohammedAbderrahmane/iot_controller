@@ -2,13 +2,17 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
-import com.iot_controller.ExhaustFan_Activity
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
+import com.iot_controller.IoTActivities.ExhaustFan_Activity
 import com.iot_controller.Model.IoTObject
-import com.iot_controller.Object2Activity
-import com.iot_controller.Services.getLogedInAuthorities
+import com.iot_controller.IoTActivities.Object2Activity
+import com.iot_controller.Services.getAssociatedAuthorities
 import maabe_tools.Maabe_tools
+import org.eclipse.californium.core.CoapClient
+import org.eclipse.californium.core.coap.CoAP
+import org.eclipse.californium.core.coap.Request
 import org.json.JSONArray
-import org.json.JSONObject
 
 const val MAABE_PUBLIC_PARAMETERS: String =
     "{\"P\":\"j7UB40qjh/mqb+y4YYTcIS6NjhL4KzkkGi70W1escmE=\"," +
@@ -20,7 +24,7 @@ const val MAABE_PUBLIC_PARAMETERS: String =
 fun decryptToken(context: Context, cypherToken: String): String? {
     var userKeys: String
 
-    val userCredentials = getLogedInAuthorities(context)
+    val userCredentials = getAssociatedAuthorities(context)
     val combinedJsonKeys = JSONArray()
     for (authCredentials in userCredentials) {
         val currentArray = JSONArray(authCredentials.keys)
@@ -71,4 +75,42 @@ fun goToObjectActivity(device: IoTObject, token: String, context: Context) {
     intent.putExtra("device", device)
     intent.putExtra("token", token)
     context.startActivity(intent)
+}
+
+fun getIotObjects(fogNodeURI:String): ArrayList<IoTObject> {
+    var ioTObjects = ArrayList<IoTObject>()
+    val coapClient = CoapClient("${fogNodeURI}/objects")
+    coapClient.setTimeout(2000)
+
+    val request = Request(CoAP.Code.GET)
+
+    val response = coapClient.advanced(request)
+    if (response != null && response.isSuccess) {
+        var iotObjectsJson = response.payload.decodeToString()
+        val gson =
+            GsonBuilder().registerTypeAdapter(IoTObject::class.java, IoTObject.IoTObjectDeserializer())
+                .create()
+        val jsonArray = JsonParser.parseString(iotObjectsJson).asJsonArray
+        ioTObjects =
+            jsonArray.map { gson.fromJson(it, IoTObject::class.java) } as ArrayList<IoTObject>
+        return ioTObjects
+    } else if (response == null) {
+        throw Exception("Failed to get authorities : Fog node didn't respond")
+    }
+    throw Exception("Failed to get authorities\n${response.responseText}")
+}
+
+fun requestEncryptedToken(fogNodeUrl: String, iotName: String): String? {
+    val coapClient = CoapClient("${fogNodeUrl}/register")
+    coapClient.setTimeout(500)
+
+    val request = Request(CoAP.Code.PUT)
+    request.payload = iotName.encodeToByteArray()
+
+    val response = coapClient.advanced(request)
+    if (response != null && response.isSuccess) {
+        return response.responseText
+    } else {
+        return null
+    }
 }

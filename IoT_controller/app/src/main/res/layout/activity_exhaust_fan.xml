@@ -9,7 +9,7 @@
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:padding="16dp"
-    tools:context=".ExhaustFan_Activity">
+    tools:context=".IoTActivities.ExhaustFan_Activity">
 
     <TextView
         android:id="@+id/unused_6"
