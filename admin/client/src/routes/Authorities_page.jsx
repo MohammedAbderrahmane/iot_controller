@@ -10,48 +10,29 @@ export default function AuthoritiesPage(params) {
 
   return (
     <div class="page">
-      <h2>list of auths</h2>
+      <h2>list of authorities</h2>
       <Show when={auths.loading}>
-        <p>Loading authorities...</p>
+        <div class="fetch-loading">
+          <p>Loading authorities...</p>
+        </div>
       </Show>
 
       <Show when={auths.error}>
-        <p style={{ color: "red" }}>Error: {auths.error.message}</p>
+        <div class="fetch-error">
+          <p>Error: {auths.error.message}</p>
+        </div>
       </Show>
 
       <Show when={auths.state == "ready"}>
-        {console.log(auths())}
-        <p style={{ color: status().good ? "green" : "red" }}>
-          {status().message}
-        </p>
         {!auths() || !auths().length ? (
-          <p>No authorties loaded</p>
+          <div class="fetch-loading">
+            <p>No authorties loaded</p>
+          </div>
         ) : (
           <div>
             {auths().map((auth) => {
               return (
-                <table class="auth-table">
-                  <tbody>
-                    <tr>
-                      <td>ID:</td>
-                      <td>{auth.ID}</td>
-                    </tr>
-                    <tr>
-                      <td>url:</td>
-                      <td>{`http://${auth.host}:${auth.port}/`}</td>
-                    </tr>
-                    <tr>
-                      <td rowSpan={auth.Pk.attributes.length + 1}>
-                        Attributes:
-                      </td>
-                    </tr>
-                    {auth.Pk.attributes.map((attr, index) => (
-                      <tr>
-                        <td>{attr}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+               <AuthorityCard auth={auth} />
               );
             })}
           </div>
@@ -59,4 +40,31 @@ export default function AuthoritiesPage(params) {
       </Show>
     </div>
   );
+}
+
+function AuthorityCard({auth}) {
+  return   <table class="auth-table">
+  <tbody>
+    <tr>
+      <td>ID:</td>
+      <td>{auth.ID}</td>
+    </tr>
+    <tr>
+      <td>url:</td>
+      <td>{`http://${auth.host}:${auth.port}/`}</td>
+    </tr>
+    <tr>
+      <td>
+        Attributes:
+      </td>
+      <td>
+        <ul class="attributes-list">
+          {auth.Pk.attributes.map((attr, index) => (
+            <li key={index}>{attr}</li>
+          ))}
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
 }

@@ -18,45 +18,54 @@ export default function UsersPage(params) {
   };
 
   return (
-    <div class="page list-users">
-      <fieldset class="new-user">
-        <legend>Create a new user</legend>
+    <div class="page">
+      
         <NewUser refetch={refetch} />
-      </fieldset>
 
-      <h2>list of users</h2>
+
+      <h2 class="page-title">list of users</h2>
       <Show when={users.loading}>
+        <div class="fetch-loading">
         <p>Loading users...</p>
+
+        </div>
       </Show>
 
       <Show when={users.error}>
-        <p style={{ color: "red" }}>Error: {users.error.message}</p>
+        <div class="fetch-error">
+
+        <p>Error: {users.error.message}</p>
+        </div>
       </Show>
 
       <Show when={users.state == "ready"}>
         {!users() || users().length == 0 ? (
-          <p>No users</p>
+          <div class="fetch-loading">
+          <p>No users found</p>
+        </div>
         ) : (
-          <div class="users">
+          <div class="list-users">
             {users().map((user, index) => {
               const [status, seStatus] = createSignal({
                 good: false,
                 message: "",
               });
               return (
-                <div class="user">
-                  <p>{user.username}</p>
-                  <p style={{ color: status().good ? "green" : "red" }}>
-                    {status().message}
-                  </p>
-                  <div>
-                    <button
-                      class="delete-btn"
-                      onClick={() => handleRemoveUser(user.username, seStatus)}
-                    >
-                      remove user
-                    </button>
+                <div class="user-card">
+                  <h3>{user.username}</h3>
+                  <div class="user-info">
+                    <span>created: </span>
+                    <span>{new Date(user.date_creation).toLocaleString()}</span>
                   </div>
+                    <span style={{ color: status().good ? "green" : "red" }}>
+                      {status().message}
+                    </span>
+                  <button
+                    class="delete-btn"
+                    onClick={() => handleRemoveUser(user.username, seStatus)}
+                  >
+                    remove user
+                  </button>
                 </div>
               );
             })}
@@ -87,7 +96,11 @@ function NewUser(params) {
   };
 
   return (
-    <>
+    <fieldset class="new-user">
+
+        <legend>Create a new user</legend>
+       
+    
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
       </p>
@@ -116,13 +129,13 @@ function NewUser(params) {
                 onChange={(e) => {
                   setPassword(e.target.value);
                 }}
-                type="text"
+                type="password"
               />
             </td>
           </tr>
         </tbody>
       </table>
       <button onClick={handleUpload}>add username</button>
-    </>
+      </fieldset>
   );
 }

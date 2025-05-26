@@ -14,6 +14,10 @@
   overflow-y: auto; /* Enable scrolling if content exceeds height */
 }
 
+.icon-on-dark {
+  filter: invert(100%); /* Inverts the colors - can turn black into white */
+}
+
 .sidebar a {
   text-decoration: none;
   color: wheat;

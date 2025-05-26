@@ -65,23 +65,24 @@ router.put("/:name", async (request, response) => {
   const object = await CRUDIoTObject.readIoTObjects(name);
   const fogNodes = await CRUDFogNode.readFogNodes(object[0].fog_node);
 
-  console.log("ttttt", object);
   try {
     // FIXME : the coap message cant be confirmed if it arrived
-    await util.sendCoapRequest(
-      {
-        action: "UPDATE",
-        objectName: name,
-        data: {
-          ...object[0],
-          access_policy: object[0].accessPolicy,
-          accessPolicy: undefined,
+    if (!ipAddress) {
+      await util.sendCoapRequest(
+        {
+          action: "UPDATE",
+          objectName: name,
+          data: {
+            ...object[0],
+            access_policy: object[0].accessPolicy,
+            accessPolicy: undefined,
+          },
         },
-      },
-      fogNodes[0].url,
-      "PUT",
-      "/objects"
-    );
+        fogNodes[0].url,
+        "PUT",
+        "/objects"
+      );
+    }
   } catch (error) {
     console.log(error);
     return response

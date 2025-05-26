@@ -3,9 +3,7 @@ printf "+---------------------------------------------------------+\n"
 printf "| %-55s |\n" "Welcome to the fognode installer"
 printf "|                                                         |\n"
 printf "| This script is used to install the fognode for the      |\n"
-printf "| first time , preferably a Raspberry Pi. It will         |\n"
-printf "| install the code running the fognode and start it. It   |\n"
-printf "| will also start the fog node on machine startup.        |\n"
+printf "| first time , preferably a Raspberry Pi.                 |\n"
 printf "+---------------------------------------------------------+\n"
 
 default_ip=$(hostname -I | awk '{print $1}')

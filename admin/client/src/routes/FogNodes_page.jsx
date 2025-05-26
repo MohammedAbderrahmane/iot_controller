@@ -9,68 +9,61 @@ export default function FogNodesPage(params) {
   const navigate = useNavigate();
 
   return (
-    <div className="page list-nodes">
-      <h2>list of nodes</h2>
+    <div className="page">
+      <h2>List of fog nodes in the system:</h2>
       <Show when={nodes.loading}>
-        <p>Loading nodes...</p>
+        <div class="fetch-loading">
+          <p>Loading nodes...</p>
+        </div>
       </Show>
 
       <Show when={nodes.error}>
-        <p style={{ color: "red" }}>Error: {nodes.error.message}</p>
+        <div class="fetch-error">
+          <p>Error: {nodes.error.message}</p>
+        </div>
       </Show>
 
       <Show when={nodes.state == "ready"}>
-        <p style={{ color: status().good ? "green" : "red" }}>
+        <p class={status().good ? "status-success" : "status-error"}>
           {status().message}
         </p>
         {!nodes() || !nodes().length ? (
-          <p>There are no nodes online</p>
+          <div class="fetch-loading">
+            <p>There are no fog nodes</p>
+          </div>
         ) : (
-          <div>
+          <div class="list-nodes">
             {nodes().map((node) => {
-              return (
-                <table>
-                  <tbody>
-                    <tr>
-                      <td>Name:</td>
-                      <td>{node.name}</td>
-                    </tr>
-                    <tr>
-                      <td>Description:</td>
-                      <td>{node.description}</td>
-                    </tr>
-                    <tr>
-                      <td>ID:</td>
-                      <td>{node.id}</td>
-                    </tr>
-                    {node.ipAddress && (
-                      <tr>
-                        <td>Object URL:</td>
-                        <td>
-                          {/* Anchor tag for the URL */}
-                          <a href={`coap://${node.ipAddress}:${node.port}/`}>
-                            coap://{node.ipAddress}:{node.port}/
-                          </a>
-                        </td>
-                      </tr>
-                    )}
-                    <tr>
-                      <td colSpan="2">
-                        <button
-                          className="btn-config"
-                          onClick={() => navigate(`/fognodes/${node.id}`)}
-                        >
-                          configure
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              );
+              return <FogNodeCard node={node} navigate={navigate} />;
             })}
           </div>
         )}
       </Show>
+    </div>
+  );
+}
+
+function FogNodeCard({ node, navigate }) {
+  return (
+    <div class="node-card">
+      <h3>{node.name}</h3>
+      <div className="node-online-status" />
+      <div class="node-info">
+        <span>id : </span>
+        <span>{node.id}</span>
+        <span>url : </span>
+        <span>{node.url}</span>
+        <span>description : </span>
+        <span>{node.description}</span>
+        <span>date de entry : </span>
+        <span>{new Date(node.date_entering).toLocaleString()}</span>
+      </div>
+      <button
+        className="btn-config"
+        onClick={() => navigate(`/fognodes/${node.id}`)}
+      >
+        configure objects
+      </button>
     </div>
   );
 }

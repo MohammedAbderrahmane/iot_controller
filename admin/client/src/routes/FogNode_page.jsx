@@ -17,58 +17,26 @@ export default function FogNodePage(params) {
   );
 
   return (
-    <div class="page fog-node">
+    <div class="page">
       <Show when={node.loading}>
-        <p>Loading node...</p>
+        <div class="fetch-loading">
+          <p>Loading node...</p>
+        </div>
       </Show>
 
       <Show when={node.error}>
-        <p style={{ color: "red" }}>Error: {node.error.message}</p>
+        <div class="fetch-error">
+          <p>Error: {node.error.message}</p>
+        </div>
       </Show>
 
       <Show when={node.state == "ready"}>
         {Object.keys(node()).length == 0 ? (
-          <p>Wrong id : fog node doesnt exist</p>
+          <div class="fetch-error">
+            <p>Wrong id : fog node doesnt exist</p>
+          </div>
         ) : (
-          <>
-            <h1>{node().name}</h1>
-            <table>
-              <tbody>
-                <tr>
-                  <td>id</td>
-                  <td>{node().id}</td>
-                </tr>
-                <tr>
-                  <td>desciption</td>
-                  <td>{node().description || "none"}</td>
-                </tr>
-                <tr>
-                  <td>fognode url</td>
-                  <td>
-                    <a>
-                      coap://{node().ipAddress}:{node().port}/
-                    </a>
-                  </td>
-                </tr>
-                <tr>
-                  <td colSpan={2}>list of objects</td>
-                </tr>
-                <tr>
-                  <td colSpan={2} class="list-objects">
-                    <ListObjects
-                      iotObjects={node().iotObjects}
-                      refetch={refetch}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td colSpan="2">
-                    <NewObject id={id} refetch={refetch} />
-                  </td>
-                </tr>
-              </tbody>
-            </table>{" "}
-          </>
+          <FogNodeDiv node={node()} refetch={refetch} />
         )}
       </Show>
     </div>
@@ -105,8 +73,8 @@ function NewObject(params) {
   };
 
   return (
-    <section class="new-object">
-      <h2>set new object</h2>
+    <fieldset class="new-object">
+      <legend>set new object</legend>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
       </p>
@@ -114,7 +82,7 @@ function NewObject(params) {
         <tbody>
           <tr>
             <td>
-              <label htmlFor="name">object Name:</label>
+              <label htmlFor="name"> Name:</label>
             </td>
             <td>
               <input
@@ -128,7 +96,7 @@ function NewObject(params) {
           </tr>
           <tr>
             <td>
-              <label htmlFor="description">object description:</label>
+              <label htmlFor="description"> description:</label>
             </td>
             <td>
               <input
@@ -140,15 +108,28 @@ function NewObject(params) {
               />
             </td>
           </tr>
+          <tr>
+            <td>
+            <label for="name"> access policy:</label>
+    </td>
+            <td>
+            <textarea
+        type="text"
+        onChange={(e) => {
+          setAccessPolicy(e.target.value);
+        }}
+      />
+            </td>
+          </tr>
         </tbody>
       </table>
 
-      <div>
+      <div class="operations-div">
         <button
+        class="search-btn"
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(" OR ");
-              setTimeout(() => setCopiedIndex(null), 2000);
             } catch (err) {
               console.error("Failed to copy text: ", err);
             }
@@ -157,10 +138,10 @@ function NewObject(params) {
           OR
         </button>
         <button
+         class="search-btn"
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(" AND ");
-              setTimeout(() => setCopiedIndex(null), 2000);
             } catch (err) {
               console.error("Failed to copy text: ", err);
             }
@@ -169,21 +150,24 @@ function NewObject(params) {
           AND
         </button>
         <button
+         class="search-btn"
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(" ( @ ) ");
-              setTimeout(() => setCopiedIndex(null), 2000);
             } catch (err) {
               console.error("Failed to copy text: ", err);
             }
           }}
         >
-          ()
+          ( @ )
         </button>
       </div>
+    
       <Show when={attributes.loading}>
         <p>Loading attributes...</p>
       </Show>
+
+
 
       <Show when={attributes.error}>
         <p style={{ color: "red" }}>Error: {attributes.error.message}</p>
@@ -193,13 +177,14 @@ function NewObject(params) {
         {Object.keys(attributes()).length == 0 ? (
           <p>No attributes found</p>
         ) : (
-          <div class="auth-list">
+          <div class="list-attributes">
             {Object.entries(attributes()).map(([key, value], index) => {
               return (
-                <div>
+                <>
                   <p>{key} : </p>
                   {value.map((attr, index) => (
                     <button
+                     class="search-btn"
                       key={index}
                       onClick={async () => {
                         try {
@@ -208,169 +193,166 @@ function NewObject(params) {
                           console.error("Failed to copy text: ", err);
                         }
                       }}
-                    >
+                      >
                       {attr}
                     </button>
                   ))}
-                </div>
+                </>
               );
             })}
           </div>
         )}
       </Show>
-      <label for="name">object access policy:</label>
-      <textarea
-        type="text"
-        onChange={(e) => {
-          setAccessPolicy(e.target.value);
-        }}
-      />
       <button onClick={handleUpload}>Add object</button>
-    </section>
+    </fieldset>
   );
 }
-function ListObjects(params) {
-  const { iotObjects, refetch } = params;
-  const [isUpdating, setIsUpdating] = createSignal(-1);
 
-  const handleDelete = async (name, seStatus) => {
+function ObjectCard({ index, iot, isUpdating, setIsUpdating }) {
+  const [description, setDescription] = createSignal(iot.description);
+  const [accessPolicy, setAccessPolicy] = createSignal(iot.accessPolicy);
+  const [status, seStatus] = createSignal({
+    good: false,
+    message: "",
+  });
+
+  const handleDelete = async (name) => {
     const result = await deleteIoTObject(name);
+
     if (result.ok) {
       seStatus({
         good: true,
         message: "object deleted successfully",
       });
-      setTimeout(() => refetch(), 2500);
+
       return;
     }
     seStatus({ good: false, message: result.message || "unknown error" });
   };
 
-  const handleUpdate = async (name, description, accessPolicy, seStatus) => {
+  const handleUpdate = async (name, description, accessPolicy) => {
     const result = await updateIoTObject(name, description, accessPolicy);
     if (result.ok) {
       seStatus({
         good: true,
         message: "object deleted successfully",
       });
-      setTimeout(() => refetch(), 2500);
       return;
     }
     seStatus({ good: false, message: result.message || "unknown error" });
   };
 
   return (
-    <>
-      {iotObjects.length == 0 ? (
-        <p class="show-empty-p">There are no objects for this node</p>
-      ) : (
+    <div
+      class={
+        "object-card " +
+        (!!iot.date_entering ? "iot-connected" : "iot-not-connected")
+      }
+    >
+      <h3>{iot.name}</h3>
+
+      <div class="object-info">
+        <span>id : </span>
+        <span>{iot.id}</span>
+        <span>description : </span>
         <div>
-          {iotObjects?.map((iot, index) => {
-            const [description, setDescription] = createSignal(iot.description);
-            const [accessPolicy, setAccessPolicy] = createSignal(
-              iot.accessPolicy
-            );
-            const [status, seStatus] = createSignal({
-              good: false,
-              message: "",
-            });
-
-            return (
-              <table
-              class={
-                "object-table " +
-                (!!iot.ipAddress ? "iot-connected" : "iot-not-connected")
-              }
-            >
-              <tbody>
-                <tr>
-                  <td colSpan={2}>{iot.name}</td>
-                </tr>
-                <tr> {/* FIXME */}
-                  <td colSpan={2} style={{ color: status().good ? "green" : "red" }}>
-                    {status().message}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>fog node:</td>
-                  <td>{iot.nodeId}</td>
-                </tr>
-
-                <tr>
-                  <td>object desciption:</td>
-                  <td>
-                    <input
-                      type="text"
-                      value={iot.description}
-                      disabled={isUpdating() !== index}
-                      onChange={(e) => {
-                        setDescription(e.target.value);
-                      }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>object access policy:</td>
-                  <td>
-                    <textarea
-                      value={iot.accessPolicy}
-                      disabled={isUpdating() !== index}
-                      onChange={(e) => {
-                        setAccessPolicy(e.target.value);
-                      }}
-                    />
-                  </td>
-                </tr>
-                {iot.ipAddress && (
-                  <tr>
-                    <td>object url:</td>
-                    <td>
-                      <a>
-                        coap://{iot.ipAddress}:{iot.port}/
-                      </a>
-                    </td>
-                  </tr>
-                )}
-                <tr>
-                  <td colSpan="2">
-                    <button
-                      className="btn-delete"
-                      onClick={() => handleDelete(iot.name, seStatus)}
-                    >
-                      delete
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setIsUpdating(isUpdating() === index ? -1 : index)
-                      }
-                    >
-                      {isUpdating() !== index ? "update" : "stop updating"}
-                    </button>
-                    {isUpdating() === index && (
-                      <button
-                        className="btn-config"
-                        onClick={() =>
-                          handleUpdate(
-                            iot.name,
-                            description(),
-                            accessPolicy(),
-                            seStatus
-                          )
-                        }
-                      >
-                        confirm update
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            );
-          })}
+          <textarea
+            value={iot.description}
+            disabled={isUpdating() !== index}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         </div>
-      )}
+        <span>access policy : </span>
+        <div>
+          <textarea
+            value={iot.accessPolicy}
+            disabled={isUpdating() !== index}
+            onChange={(e) => setAccessPolicy(e.target.value)}
+          />
+        </div>
+        <span>created : </span>
+        <span>{new Date(iot.date_creation).toLocaleString()}</span>
+        {iot.date_entering && (
+          <>
+            <span>url : </span>
+            <span>{iot.url}</span>
+            <span>date de entry : </span>
+            <span>{new Date(iot.date_entering).toLocaleString()}</span>
+          </>
+        )}
+      </div>
+
+      <p style={{ color: status().good ? "green" : "red" }}>
+        {status().message}
+      </p>
+
+      <div class="object-actions">
+        <button className="delete-btn" onClick={() => handleDelete(iot.name)}>
+          delete
+        </button>
+
+        <button
+          class="search-btn"
+          onClick={() => setIsUpdating(isUpdating() === index ? -1 : index)}
+        >
+          {isUpdating() !== index ? "update" : "stop updating"}
+        </button>
+        {isUpdating() === index && (
+          <button
+            className="accept-btn"
+            onClick={() =>
+              handleUpdate(iot.name, description(), accessPolicy())
+            }
+          >
+            confirm update
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FogNodeDiv({ node, refetch }) {
+  const [isUpdating, setIsUpdating] = createSignal(-1);
+
+  return (
+    <>
+      <h2>{node.name}</h2>
+
+      <div class="node-info">
+        <span>id : </span>
+        <span>{node.id}</span>
+        <span>desciption : </span>
+        <span>{node.description || "none"}</span>
+        <span>url : </span>
+        <span>{node.url}/</span>
+        <span>created : </span>
+        <span>{new Date(node.date_creation).toLocaleString()}</span>
+        <span>entred : </span>
+        <span>{new Date(node.date_entering).toLocaleString()}</span>
+      </div>
+
+      <h3>List of objects</h3>
+
+      <div class="list-objects">
+          {node.iotObjects.length == 0 ? (
+            <div class="fetch-loading">
+            <p class="show-empty-p">There are no objects for this node</p>
+              </div> 
+          ) : (
+            <>
+              {node.iotObjects?.map((iot, index) => (
+                <ObjectCard
+                  iot={iot}
+                  index={index}
+                  isUpdating={isUpdating}
+                  setIsUpdating={setIsUpdating}
+                />
+              ))}
+            </>
+          )}
+      </div>
+      <NewObject id={node.id} refetch={refetch} />
     </>
   );
 }

@@ -9,19 +9,113 @@ export default function IoTObjectPage(params) {
   const [isUpdating, setIsUpdating] = createSignal(-1);
   const [filterText, setFilterText] = createSignal("");
 
-  const handleDelete = async (name, seStatus) => {
+
+
+  const handleFilterChange = (event) => {
+    setFilterText(event.target.value);
+  };
+
+  const filteredData = () => {
+    mutate((prev) =>
+      prev.filter(
+        (item) =>
+          item.name.toLowerCase().includes(filterText().toLowerCase()) ||
+          item.description.toLowerCase().includes(filterText().toLowerCase()) ||
+          item.ipAddress?.toLowerCase().includes(filterText().toLowerCase()) ||
+          item.accessPolicy
+            .toLowerCase()
+            .includes(filterText().toLowerCase()) ||
+          item.fog_node.toLowerCase().includes(filterText().toLowerCase())
+      )
+    );
+  };
+
+  return (
+    <div class="page">
+      <h2>list of objects</h2>
+      <div class="filter-objects-div">
+        <input
+          type="text"
+          placeholder="Filter data..."
+          value={filterText()}
+          onChange={handleFilterChange}
+        />
+        <button
+          class="search-btn"
+          onClick={() => {
+            filteredData();
+          }}
+        >
+          search
+        </button>
+        <button
+          class="delete-btn"
+          onClick={() => {
+            refetch();
+          }}
+        >
+          clear
+        </button>
+      </div>
+      <div class="list-objects">
+
+        <Show when={iotObjects.loading}>
+          <div class="fetch-loading">
+            <p>Loading objects...</p>
+          </div>
+        </Show>
+
+        <Show when={iotObjects.error}>
+          <div class="fetch-error">
+            <p style={{ color: "red" }}>Error: {iotObjects.error.message}</p>
+          </div>
+        </Show>
+
+        <Show when={iotObjects.state == "ready"}>
+          {iotObjects().length == 0 ? (
+            <div class="fetch-loading">
+              <p>Ther are no objects for this node</p>
+            </div>
+          ) : (
+            <>
+              {iotObjects()?.map((iot, index) => {
+                return <ObjectCard index={index} iot={iot} isUpdating={isUpdating} setIsUpdating={setIsUpdating} />;
+              })}
+         
+            </>
+          )}
+        </Show>
+      </div>
+    </div>
+  );
+}
+
+function ObjectCard({ index, iot, isUpdating, setIsUpdating }) {
+  const [description, setDescription] = createSignal(
+    iot.description
+  );
+  const [accessPolicy, setAccessPolicy] = createSignal(
+    iot.accessPolicy
+  );
+  const [status, seStatus] = createSignal({
+    good: false,
+    message: "",
+  });
+
+  const handleDelete = async (name) => {
     const result = await deleteIoTObject(name);
     if (result.ok) {
       seStatus({
         good: true,
         message: "object deleted successfully",
       });
+      
       return;
     }
     seStatus({ good: false, message: result.message || "unknown error" });
   };
 
-  const handleUpdate = async (name, description, accessPolicy, seStatus) => {
+  const handleUpdate = async (name, description, accessPolicy) => {
     const result = await updateIoTObject(name, description, accessPolicy);
     if (result.ok) {
       seStatus({
@@ -33,174 +127,83 @@ export default function IoTObjectPage(params) {
     seStatus({ good: false, message: result.message || "unknown error" });
   };
 
-  const handleFilterChange = (event) => {
-    setFilterText(event.target.value);
-  };
-
-  // Filter the data based on the filterText
-  // We convert both the data string and filter text to lower case for case-insensitive filtering
-  const filteredData = () => {
-    mutate((prev) =>
-      prev.filter(
-        (item) =>
-          item.name.toLowerCase().includes(filterText().toLowerCase()) ||
-          item.description.toLowerCase().includes(filterText().toLowerCase()) ||
-          item.ipAddress?.toLowerCase().includes(filterText().toLowerCase()) ||
-          item.accessPolicy
-            .toLowerCase()
-            .includes(filterText().toLowerCase()) ||
-          item.nodeId.toLowerCase().includes(filterText().toLowerCase())
-      )
-    );
-  };
-
   return (
-    <div class="page list-objects">
-      <h2>list of objects</h2>
-      <div class="filter">
-        <input
-          type="text"
-          placeholder="Filter data..."
-          value={filterText()}
-          onChange={handleFilterChange}
-        />
-        <button
-          onClick={() => {
-            filteredData();
-          }}
-        >
-          search
-        </button>
-        <button
-          onClick={() => {
-            refetch();
-          }}
-        >
-          clear
-        </button>
-      </div>
-      <Show when={iotObjects.loading}>
-        <p>Loading objects...</p>
-      </Show>
+    <div
+      class={
+        "object-card " +
+        (!!iot.date_entering ? "iot-connected" : "iot-not-connected")
+      }
+    >
+      <h3>{iot.name}</h3>
 
-      <Show when={iotObjects.error}>
-        <p style={{ color: "red" }}>Error: {iotObjects.error.message}</p>
-      </Show>
+      <div class="object-info">
+        <span>id : </span>
+        <span>{iot.id}</span>
+        <span>description : </span>
+        <div>
 
-      <Show when={iotObjects.state == "ready"}>
-        {iotObjects().length == 0 ? (
-          <p>Ther are no objects for this node</p>
-        ) : (
-          <div>
-            {iotObjects()?.map((iot, index) => {
-              const [description, setDescription] = createSignal(
-                iot.description
-              );
-              const [accessPolicy, setAccessPolicy] = createSignal(
-                iot.accessPolicy
-              );
-              const [status, seStatus] = createSignal({
-                good: false,
-                message: "",
-              });
-
-              return (
-                <table
-                  class={
-                    "object-table " +
-                    (!!iot.ipAddress ? "iot-connected" : "iot-not-connected")
-                  }
-                >
-                  <tbody>
-                    <tr>
-                      <td colSpan={2}>{iot.name}</td>
-                    </tr>
-                    <tr> {/* FIXME */}
-                      <td colSpan={2} style={{ color: status().good ? "green" : "red" }}>
-                        {status().message}
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td>fog node:</td>
-                      <td>{iot.nodeId}</td>
-                    </tr>
-
-                    <tr>
-                      <td>object desciption:</td>
-                      <td>
-                        <input
-                          type="text"
-                          value={iot.description}
-                          disabled={isUpdating() !== index}
-                          onChange={(e) => {
-                            setDescription(e.target.value);
-                          }}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>object access policy:</td>
-                      <td>
-                        <textarea
-                          value={iot.accessPolicy}
-                          disabled={isUpdating() !== index}
-                          onChange={(e) => {
-                            setAccessPolicy(e.target.value);
-                          }}
-                        />
-                      </td>
-                    </tr>
-                    {iot.ipAddress && (
-                      <tr>
-                        <td>object url:</td>
-                        <td>
-                          <a>
-                            coap://{iot.ipAddress}:{iot.port}/
-                          </a>
-                        </td>
-                      </tr>
-                    )}
-                    <tr>
-                      <td colSpan="2">
-                        <button
-                          className="btn-delete"
-                          onClick={() => handleDelete(iot.name, seStatus)}
-                        >
-                          delete
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            setIsUpdating(isUpdating() === index ? -1 : index)
-                          }
-                        >
-                          {isUpdating() !== index ? "update" : "stop updating"}
-                        </button>
-                        {isUpdating() === index && (
-                          <button
-                            className="btn-config"
-                            onClick={() =>
-                              handleUpdate(
-                                iot.name,
-                                description(),
-                                accessPolicy(),
-                                seStatus
-                              )
-                            }
-                          >
-                            confirm update
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              );
-            })}
+        <textarea
+          value={iot.description}
+          disabled={isUpdating() !== index}
+          onChange={(e) => setDescription(e.target.value)}
+          />
           </div>
+        <span>access policy : </span>
+        <div>
+
+        <textarea
+          value={iot.accessPolicy}
+          disabled={isUpdating() !== index}
+          onChange={(e) => setAccessPolicy(e.target.value)}
+          />
+          </div>
+        <span>created : </span>
+        <span>{new Date(iot.date_creation).toLocaleString()}</span>
+        {iot.date_entering &&
+          <>
+            <span>url : </span>
+            <span>{iot.url}</span>
+            <span>date de entry : </span>
+            <span>{new Date(iot.date_entering).toLocaleString()}</span>
+          </>
+        }
+      </div>
+
+      <p style={{ color: status().good ? "green" : "red" }}>
+        {status().message}
+      </p>
+
+      <div class="object-actions">
+        <button
+          className="delete-btn"
+          onClick={() => handleDelete(iot.name)}
+        >
+          delete
+        </button>
+
+        <button
+          class="search-btn"
+          onClick={() =>
+            setIsUpdating(isUpdating() === index ? -1 : index)
+          }
+        >
+          {isUpdating() !== index ? "update" : "stop updating"}
+        </button>
+        {isUpdating() === index && (
+          <button
+            className="accept-btn"
+            onClick={() =>
+              handleUpdate(
+                iot.name,
+                description(),
+                accessPolicy(),
+              )
+            }
+          >
+            confirm update
+          </button>
         )}
-      </Show>
-    </div>
-  );
+      </div>
+
+    </div>);
 }
