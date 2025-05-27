@@ -1,16 +1,17 @@
 const fs = require("fs");
 const coap = require("coap");
+const {glob} = require("glob");
 
 const AUTHORITIES_PATH = "./auths";
 
-function getAuthorities(params) {
+async function getAuthorities(params) {
   const auths = [];
   if (!fs.existsSync(AUTHORITIES_PATH)) {
     fs.mkdirSync(AUTHORITIES_PATH);
     return [];
   }
 
-  const fileList = fs.globSync(`${AUTHORITIES_PATH}/*`);
+  const fileList = glob.sync(`${AUTHORITIES_PATH}/*`);
   for (const fileName of fileList) {
     const fileContent = fs.readFileSync(fileName);
 

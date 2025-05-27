@@ -23,11 +23,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 // ---
-var iotObjects = [];
 var authorities = [];
-
-authorities = util.getAuthorities();
-
 // ---
 const admin = () => JSON.parse(fs.readFileSync(`admin.json`).toString());
 
@@ -74,15 +70,18 @@ app.get("/api/admin/verify", async (request, response) => {
 
 // ---
 app.get("/api/auths", async (request, response) => {
+  authorities = await util.getAuthorities();
   response.json(authorities);
 });
 
 app.get("/api/auths/info", async (request, response) => {
+  authorities = await util.getAuthorities();
   response.json(authorities.map((auth) => ({ ...auth, Pk: undefined })));
 });
 
 app.get("/api/auths/attributes", async (request, response) => {
   const attributes = {};
+  authorities = await util.getAuthorities();
   for (const auth of authorities) {
     attributes[auth["ID"]] = auth.Pk.attributes;
   }
