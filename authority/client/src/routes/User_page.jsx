@@ -59,7 +59,6 @@ export default function UsersPage(params) {
         <GetUsers refetch={refetch} />
       </fieldset>
 
-      <h2>list of users</h2>
       <Show when={users.loading}>
         <p>Loading users...</p>
       </Show>
@@ -72,177 +71,366 @@ export default function UsersPage(params) {
         {!users() ? (
           <p>No users</p>
         ) : (
-          <div class="users">
-            {users().map((user, index) => {
-              const [attrs, setAttrs] = createSignal([]);
+          <>
+            <h2>List of new users</h2>
+            <div className="users">
+              <Show when={users().undefinedUsers.length == 0}>
+                <p>No new users</p>
+              </Show>
+              {users().undefinedUsers.map((user, index) => {
+                const [attrs, setAttrs] = createSignal([]);
 
-              if (user.attributes.length) {
-                setAttrs(user.attributes.split("/"));
-              }
-
-              const [status, seStatus] = createSignal({
-                good: false,
-                message: "",
-              });
-              const [toggleAttributes, setToggleAttributes] = createSignal({});
-
-              const [attribute, setAttribute] = createSignal(null);
-              const [action, setAction] = createSignal([-1, -1]);
-
-              const handleUpload = async () => {
-                const toggled = toggleAttributes();
-
-                const validAttributes = Object.entries(toggled)
-                  .filter(([key, value]) => value)
-                  .map((tgl) => tgl[0]);
-                console.log(validAttributes);
-
-                const result = await updateUserAttribute(
-                  user.username,
-                  validAttributes
-                );
-                if (result.ok) {
-                  seStatus({
-                    good: true,
-                    message: "attribute added successfully",
-                  });
-                  setTimeout(() => refetch(), 1500);
-                  return;
-                }
-                seStatus({
+                const [status, seStatus] = createSignal({
                   good: false,
-                  message: result.message || "unknown error",
+                  message: "",
                 });
-              };
+                const [toggleAttributes, setToggleAttributes] = createSignal(
+                  {}
+                );
 
-              const toggle = (attr) => {
-                setToggleAttributes((prev) => {
-                  return { ...prev, [attr]: !prev[attr] };
-                });
-              };
+                const [attribute, setAttribute] = createSignal(null);
+                const [action, setAction] = createSignal([-1, -1]);
 
-              return (
-                <div class="user">
-                  <p>{user.username}</p>
-                  {attrs().length ? (
-                    attrs().map((attr) => <span>{attr}</span>)
-                  ) : (
-                    <p>User have no attributes</p>
-                  )}
-                  <p style={{ color: status().good ? "green" : "red" }}>
-                    {status().message}
-                  </p>
-                  {attrs().length ? (
-                    <div>
-                      <button
-                        class="renew-btn"
-                        onClick={() => {
-                          setAction([index, 0]);
-                        }}
-                      >
-                        add attribute
-                      </button>
-                      {attrs().length > 1 && (
+                const handleUpload = async () => {
+                  const toggled = toggleAttributes();
+
+                  const validAttributes = Object.entries(toggled)
+                    .filter(([key, value]) => value)
+                    .map((tgl) => tgl[0]);
+                  console.log(validAttributes);
+
+                  const result = await updateUserAttribute(
+                    user.username,
+                    validAttributes
+                  );
+                  if (result.ok) {
+                    seStatus({
+                      good: true,
+                      message: "attribute added successfully",
+                    });
+                    setTimeout(() => refetch(), 1500);
+                    return;
+                  }
+                  seStatus({
+                    good: false,
+                    message: result.message || "unknown error",
+                  });
+                };
+
+                const toggle = (attr) => {
+                  setToggleAttributes((prev) => {
+                    return { ...prev, [attr]: !prev[attr] };
+                  });
+                };
+
+                return (
+                  <div class="user">
+                    <p>{user.username}</p>
+                    {attrs().length ? (
+                      attrs().map((attr) => <span>{attr}</span>)
+                    ) : (
+                      <p>User have no attributes</p>
+                    )}
+                    <p style={{ color: status().good ? "green" : "red" }}>
+                      {status().message}
+                    </p>
+                    {attrs().length ? (
+                      <div>
                         <button
-                          class="delete-btn"
+                          class="renew-btn"
                           onClick={() => {
-                            setAction([index, 1]);
+                            setAction([index, 0]);
                           }}
                         >
-                          remove attribute
+                          add attribute
                         </button>
-                      )}
-                      <button
-                        class="delete-btn"
-                        onClick={() =>
-                          handleRemoveUser(user.username, seStatus)
-                        }
-                      >
-                        remove user
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
-                      <Show when={info.loading}>
-                        <p>Loading attributes...</p>
-                      </Show>
-
-                      <Show when={info.error}>
-                        <p style={{ color: "red" }}>
-                          Error: {users.error.message}
-                        </p>
-                      </Show>
-
-                      <Show when={info.state == "ready"}>
-                        {info().authority.Pk.attributes.map((attr) => (
+                        {attrs().length > 1 && (
                           <button
-                            onClick={(e) => {
-                              toggle(attr);
-                            }}
-                            style={{
-                              background: toggleAttributes()[attr]
-                                ? "green"
-                                : "grey",
+                            class="delete-btn"
+                            onClick={() => {
+                              setAction([index, 1]);
                             }}
                           >
-                            {attr}
+                            remove attribute
                           </button>
-                        ))}
-                        <button onClick={handleUpload}>add attributes</button>
-                      </Show>
-                    </div>
-                  )}
-
-                  {action()[0] == index &&
-                    (action()[1] == 0 ? (
-                      <div class="select-div">
-                        <select onChange={(e) => setAttribute(e.target.value)}>
-                          <option value="">Select an attribute</option>
-                          {info()
-                            .authority.Pk.attributes.filter(
-                              (attr) => !attrs().includes(attr)
-                            )
-                            .map((attr) => (
-                              <option value={attr}>{attr}</option>
-                            ))}
-                        </select>
+                        )}
                         <button
+                          class="delete-btn"
                           onClick={() =>
-                            handleAddAttribute(
-                              user.username,
-                              attribute(),
-                              seStatus
-                            )
+                            handleRemoveUser(user.username, seStatus)
                           }
                         >
-                          confim add
+                          remove user
                         </button>
                       </div>
                     ) : (
-                      <div class="select-div">
-                        <select onChange={(e) => setAttribute(e.target.value)}>
-                          <option value="">Select an attribute</option>
-                          {attrs().map((attr) => (
-                            <option value={attr}>{attr}</option>
+                      <div>
+                        <Show when={info.loading}>
+                          <p>Loading attributes...</p>
+                        </Show>
+
+                        <Show when={info.error}>
+                          <p style={{ color: "red" }}>
+                            Error: {users.error.message}
+                          </p>
+                        </Show>
+
+                        <Show when={info.state == "ready"}>
+                          {info().authority.Pk.attributes.map((attr) => (
+                            <button
+                              onClick={(e) => {
+                                toggle(attr);
+                              }}
+                              style={{
+                                background: toggleAttributes()[attr]
+                                  ? "green"
+                                  : "grey",
+                              }}
+                            >
+                              {attr}
+                            </button>
                           ))}
-                        </select>
+                          <button onClick={handleUpload}>add attributes</button>
+                        </Show>
+                      </div>
+                    )}
+
+                    {action()[0] == index &&
+                      (action()[1] == 0 ? (
+                        <div class="select-div">
+                          <select
+                            onChange={(e) => setAttribute(e.target.value)}
+                          >
+                            <option value="">Select an attribute</option>
+                            {info()
+                              .authority.Pk.attributes.filter(
+                                (attr) => !attrs().includes(attr)
+                              )
+                              .map((attr) => (
+                                <option value={attr}>{attr}</option>
+                              ))}
+                          </select>
+                          <button
+                            onClick={() =>
+                              handleAddAttribute(
+                                user.username,
+                                attribute(),
+                                seStatus
+                              )
+                            }
+                          >
+                            confim add
+                          </button>
+                        </div>
+                      ) : (
+                        <div class="select-div">
+                          <select
+                            onChange={(e) => setAttribute(e.target.value)}
+                          >
+                            <option value="">Select an attribute</option>
+                            {attrs().map((attr) => (
+                              <option value={attr}>{attr}</option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() =>
+                              handleDeleteAttribute(
+                                user.username,
+                                attribute(),
+                                seStatus
+                              )
+                            }
+                          >
+                            confim delete
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                );
+              })}
+            </div>
+            <h2>List of users</h2>
+            <div class="users">
+              <Show when={users().definedUsers.length == 0}>
+                <p>No users</p>
+              </Show>
+              {users().definedUsers.map((user, index) => {
+                const [attrs, setAttrs] = createSignal([]);
+
+                if (user.attributes.length) {
+                  setAttrs(user.attributes.split("/"));
+                }
+
+                const [status, seStatus] = createSignal({
+                  good: false,
+                  message: "",
+                });
+                const [toggleAttributes, setToggleAttributes] = createSignal(
+                  {}
+                );
+
+                const [attribute, setAttribute] = createSignal(null);
+                const [action, setAction] = createSignal([-1, -1]);
+
+                const handleUpload = async () => {
+                  const toggled = toggleAttributes();
+
+                  const validAttributes = Object.entries(toggled)
+                    .filter(([key, value]) => value)
+                    .map((tgl) => tgl[0]);
+                  console.log(validAttributes);
+
+                  const result = await updateUserAttribute(
+                    user.username,
+                    validAttributes
+                  );
+                  if (result.ok) {
+                    seStatus({
+                      good: true,
+                      message: "attribute added successfully",
+                    });
+                    setTimeout(() => refetch(), 1500);
+                    return;
+                  }
+                  seStatus({
+                    good: false,
+                    message: result.message || "unknown error",
+                  });
+                };
+
+                const toggle = (attr) => {
+                  setToggleAttributes((prev) => {
+                    return { ...prev, [attr]: !prev[attr] };
+                  });
+                };
+
+                return (
+                  <div class="user">
+                    <p>{user.username}</p>
+                    {attrs().length ? (
+                      attrs().map((attr) => <span>{attr}</span>)
+                    ) : (
+                      <p>User have no attributes</p>
+                    )}
+                    <p style={{ color: status().good ? "green" : "red" }}>
+                      {status().message}
+                    </p>
+                    {attrs().length ? (
+                      <div>
                         <button
+                          class="renew-btn"
+                          onClick={() => {
+                            setAction([index, 0]);
+                          }}
+                        >
+                          add attribute
+                        </button>
+                        {attrs().length > 1 && (
+                          <button
+                            class="delete-btn"
+                            onClick={() => {
+                              setAction([index, 1]);
+                            }}
+                          >
+                            remove attribute
+                          </button>
+                        )}
+                        <button
+                          class="delete-btn"
                           onClick={() =>
-                            handleDeleteAttribute(
-                              user.username,
-                              attribute(),
-                              seStatus
-                            )
+                            handleRemoveUser(user.username, seStatus)
                           }
                         >
-                          confim delete
+                          remove user
                         </button>
                       </div>
-                    ))}
-                </div>
-              );
-            })}
-          </div>
+                    ) : (
+                      <div>
+                        <Show when={info.loading}>
+                          <p>Loading attributes...</p>
+                        </Show>
+
+                        <Show when={info.error}>
+                          <p style={{ color: "red" }}>
+                            Error: {users.error.message}
+                          </p>
+                        </Show>
+
+                        <Show when={info.state == "ready"}>
+                          {info().authority.Pk.attributes.map((attr) => (
+                            <button
+                              onClick={(e) => {
+                                toggle(attr);
+                              }}
+                              style={{
+                                background: toggleAttributes()[attr]
+                                  ? "green"
+                                  : "grey",
+                              }}
+                            >
+                              {attr}
+                            </button>
+                          ))}
+                          <button onClick={handleUpload}>add attributes</button>
+                        </Show>
+                      </div>
+                    )}
+
+                    {action()[0] == index &&
+                      (action()[1] == 0 ? (
+                        <div class="select-div">
+                          <select
+                            onChange={(e) => setAttribute(e.target.value)}
+                          >
+                            <option value="">Select an attribute</option>
+                            {info()
+                              .authority.Pk.attributes.filter(
+                                (attr) => !attrs().includes(attr)
+                              )
+                              .map((attr) => (
+                                <option value={attr}>{attr}</option>
+                              ))}
+                          </select>
+                          <button
+                            onClick={() =>
+                              handleAddAttribute(
+                                user.username,
+                                attribute(),
+                                seStatus
+                              )
+                            }
+                          >
+                            confim add
+                          </button>
+                        </div>
+                      ) : (
+                        <div class="select-div">
+                          <select
+                            onChange={(e) => setAttribute(e.target.value)}
+                          >
+                            <option value="">Select an attribute</option>
+                            {attrs().map((attr) => (
+                              <option value={attr}>{attr}</option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() =>
+                              handleDeleteAttribute(
+                                user.username,
+                                attribute(),
+                                seStatus
+                              )
+                            }
+                          >
+                            confim delete
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </Show>
     </div>

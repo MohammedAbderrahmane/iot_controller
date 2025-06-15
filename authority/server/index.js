@@ -363,10 +363,13 @@ app.get("/api/users/all", async (req, res) => {
 
   const users = rows.map((user) => ({
     username: user.username,
-    attributes: user.attributes || [],
+    attributes: user.attributes || undefined,
   }));
 
-  res.status(200).json(users);
+  res.status(200).json({
+    definedUsers: users.filter((user) => user.attributes),
+    undefinedUsers: users.filter((user) => !user.attributes),
+  });
 });
 
 app.get("/api/users/admin", async (req, res) => {
@@ -374,14 +377,16 @@ app.get("/api/users/admin", async (req, res) => {
     headers: { authority: authority.ID },
   });
 
-  console.log(users.data);
   if (!users.data) {
     res.status(500).send({ message: "failed to get users from server" });
   }
 
-  await db.promise().execute("DELETE FROM User WHERE TRUE");
+  const [listUsers] = await db.promise().execute("SELECT * FROM User;");
+  const usernames = listUsers.map((user) => user.username);
 
   for (const user of users.data) {
+    if (usernames.includes(user.username)) continue;
+
     await db
       .promise()
       .execute("INSERT INTO User (username,password) VALUES (?,?);", [
