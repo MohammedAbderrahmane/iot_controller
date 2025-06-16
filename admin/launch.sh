@@ -1,14 +1,37 @@
 #!/bin/bash
 DEV_COMMAND="npm run dev"
+NODE_MODULES_DIR="node_modules"
 
 cd server
+if [ ! -d "$NODE_MODULES_DIR" ]; then
+  echo "➰ Running 'npm install'..."
+  npm install
+  if [ $? -eq 0 ]; then
+    echo "'✅ npm install' completed successfully."
+  else
+    echo "📛 Error: 'npm install' failed."
+    exit 1
+  fi
+else
+  echo "✅ Directory '$NODE_MODULES_DIR' already exists. Skipping 'npm install'."
+fi
 $DEV_COMMAND &
 SERVER_PID=$!
 echo "Node.js server started with PID: $SERVER_PID"
 
-cd ../client 
-echo "Navigating to ./client and starting the frontend development server..."
-
+cd ../client
+if [ ! -d "$NODE_MODULES_DIR" ]; then
+  echo "➰ Running 'npm install'..."
+  npm install
+  if [ $? -eq 0 ]; then
+    echo "'✅ npm install' completed successfully."
+  else
+    echo "📛 Error: 'npm install' failed."
+    exit 1
+  fi
+else
+  echo "✅ Directory '$NODE_MODULES_DIR' already exists. Skipping 'npm install'."
+fi
 $DEV_COMMAND &
 FRONTEND_PID=$!
 echo "Frontend server started with PID: $FRONTEND_PID"

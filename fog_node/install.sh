@@ -51,10 +51,23 @@ if [ $? -eq 0 ]; then
 else
   printf "➰ Installing GoLang ...\n"
   GO_INSTALL_DIR="/usr/local"
+  
   wget https://go.dev/dl/go1.24.2.linux-arm64.tar.gz
   rm -rf $GO_INSTALL_DIR/go && tar -C $GO_INSTALL_DIR -xzf go1.24.2.linux-arm64.tar.gz
+  
   export PATH=$PATH:$GO_INSTALL_DIR/go/bin
   rm go1.24.2.linux-arm64.tar.gz
+
+  LINE='export PATH=$PATH:/usr/local/go/bin'
+  CONFIG_FILE="$HOME/.bashrc"
+  
+  # Check if the line already exists
+  if grep -Fxq "$LINE" "$CONFIG_FILE"; then
+      echo "PATH already updated in $CONFIG_FILE"
+  else
+      echo "$LINE" >> "$CONFIG_FILE"
+      echo "Added Go path to $CONFIG_FILE"
+  fi
 
   go version > /dev/null 2>&1
   if [ $? -eq 0 ]; then
@@ -73,6 +86,7 @@ else
   printf "➰ Building MA-ABE encryptor\n"
   go mod tidy
   go build -o "$maabe_encryptor_file" encryptor.go
+  chmod +x $maabe_encryptor_file
   printf " ✅ MA-ABE encryptor is built\n\n"
 fi
 cd ..
@@ -121,6 +135,16 @@ EOF
 )
 echo "$config_string" >> .env
 
+printf "➰ Installing MySQL...\n\n"
+
+echo "Updating package lists..."
+sudo apt update
+
+# Install MySQL Server
+echo "Installing MySQL Server..."
+sudo apt install mariadb-server -y
+
+printf "✅ MySQL is installed.\n\n"
 printf "➰ Setting up db...\n\n"
 
 printf "➰ Creating user...\n"
