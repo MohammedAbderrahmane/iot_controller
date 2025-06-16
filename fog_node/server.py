@@ -47,8 +47,7 @@ def setup_objects_as_map():
         nested_obj = obj.copy()
         del nested_obj["name"]
         objects_as_map[name] = nested_obj
-    
-    print("---  ---")
+
 
 def notify_admin_object_joined(iot_object_id, ip_address, port):
     server_url = os.getenv("SERVER_URL") + "/api/objects/" + iot_object_id
@@ -189,7 +188,6 @@ class IoTObjects(Res.Resource):
     # get objects
     async def render_get(self, request):
         objects_list = []
-        print(objects_as_map)
         for name, data in objects_as_map.items():
             full_object = {"name": name, **data}
             objects_list.append(full_object)
@@ -312,7 +310,7 @@ async def main():
         root, bind=(IP_ADDRESS, PORT)
     )
 
-    print(f"\nFog node running at: coap://{IP_ADDRESS}:{PORT}\n")
+    print(f"\nFog node running at: coap://{IP_ADDRESS}:{PORT}")
 
     print("-" * 50)
     print(f"{'GET':<8} {'/':<20} Test if fog node is online")
@@ -328,6 +326,7 @@ async def main():
 
 if __name__ == "__main__":
     setup_objects_as_map()
-    register_fog_node()
-    fetch_authorities()
+    can_fetch = register_fog_node()
+    if can_fetch:
+        fetch_authorities()
     asyncio.run(main())
