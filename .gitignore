@@ -58,3 +58,4 @@ gitignore
 .DS_Store
 Thumbs.db
 **/package-lock.json
+fog_node/__pycache__/db.cpython-310.pyc

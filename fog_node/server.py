@@ -313,7 +313,7 @@ async def main():
     print(f"\nFog node running at: coap://{IP_ADDRESS}:{PORT}")
 
     print("-" * 50)
-    print(f"{'GET':<8} {'/':<20} Test if fog node is online")
+    print(f"{'GET':<8} {'/ping':<20} Test if fog node is online")
     print(f"{'GET':<8} {'/objects':<20} User gets all objects")
     print(f"{'POST':<8} {'/objects':<20} Admin sends new IoT object definition")
     print(f"{'PUT':<8} {'/objects':<20} Admin update an existing IoT object")
