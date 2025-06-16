@@ -18,8 +18,13 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
+import com.iot_controller.Model.Authority
 import com.iot_controller.components.showLoadingDialog
 import org.bouncycastle.crypto.generators.SCrypt
+import org.eclipse.californium.core.CoapClient
+import org.eclipse.californium.core.coap.CoAP
 import java.net.InetAddress
 import java.util.Base64
 import java.util.concurrent.Executors
@@ -119,28 +124,49 @@ class LoginActivity : AppCompatActivity() {
 
         val host =
             if (switch_fog_automode.isChecked) FOG_NODE_DEFAULT_DOMAIN else "${input_fog_ip.text}"
-
+        val port = input_fog_port.text.toString().trim()
+        val uri = if (port == "5683" || port.isEmpty()) {
+            "coap://$host"
+        } else {
+            "coap://$host:$port"
+        }
+        Log.e("zzzz",uri)
         executor.execute {
 
             var loadingDialog: AlertDialog? = null
             handler.post {
                 loadingDialog = showLoadingDialog(this, "pinging fog node...")
             }
+
+            val coapClient = CoapClient("$uri/ping")
+            coapClient.setTimeout(2000)
+
+            val request = org.eclipse.californium.core.coap.Request(CoAP.Code.GET)
+
             try {
-                val address = InetAddress.getByName(host)
-                address.isReachable(3000)
+                val response = coapClient.advanced(request)
+                if (response != null && response.isSuccess) {
+                    handler.post {
+                        loadingDialog!!.dismiss()
+                    }
+                } else {
+                    handler.post {
+                        loadingDialog!!.dismiss()
+                    }
+                    setStatus("Fog node is unreachable", R.color.error)
+                    return@execute
+                }
             } catch (e: Exception) {
+                Log.e("eee",e.toString())
                 handler.post {
                     loadingDialog!!.dismiss()
                 }
                 setStatus("Fog node is unreachable", R.color.error)
                 return@execute
             }
-            handler.post {
-                loadingDialog!!.dismiss()
-            }
-            setStatus("Found the fog node, Proceeding to home page ...", R.color.success)
 
+
+            setStatus("Found the fog node, Proceeding to home page ...", R.color.success)
             val inputPassword = "${input_password.text}"
             val username = "${input_username.text}"
 
@@ -166,12 +192,6 @@ class LoginActivity : AppCompatActivity() {
                 editor.putString("password", derivedPassword)
                 editor.putString("fogNodeHost", host)
                 if (!switch_fog_automode.isChecked) {
-                    val port = input_fog_port.text.toString().trim()
-                    val uri = if (port == "5683" || port.isEmpty()) {
-                        "coap://$host"
-                    } else {
-                        "coap://$host:$port"
-                    }
                     editor.putString("fogNodeURI", uri)
                 } else {
                     editor.putString("fogNodeURI", "coap://$host")

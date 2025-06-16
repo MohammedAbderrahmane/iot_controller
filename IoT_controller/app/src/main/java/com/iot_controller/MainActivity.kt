@@ -16,6 +16,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.iot_controller.db.MaabeKeyDbHelper
+import org.eclipse.californium.core.CoapClient
+import org.eclipse.californium.core.coap.CoAP
 import java.net.InetAddress
 import java.util.concurrent.Executors
 
@@ -125,16 +127,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         executor.execute {
-            try {
-                val address = InetAddress.getByName(fogNodeHost)
-                address.isReachable(3000)
-            } catch (e: Exception) {
-                Log.e("ping-error" , e.message.toString()   )
-                setConnectedStatus("Not connected", R.color.error)
-                return@execute
-            }
-            setConnectedStatus("Connected", R.color.success)
+            val coapClient = CoapClient("$fogNodeURI/ping")
+            coapClient.setTimeout(2000)
 
+            val request = org.eclipse.californium.core.coap.Request(CoAP.Code.GET)
+
+            val response = coapClient.advanced(request)
+            if (response != null && response.isSuccess) {
+                setConnectedStatus("Connected", R.color.success)
+            } else {
+                setConnectedStatus("Not connected", R.color.error)
+            }
         }
     }
 
