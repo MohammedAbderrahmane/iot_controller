@@ -149,3 +149,16 @@
     margin-right: 15px; /* Add margin back when not collapsed */
   }
 }
+
+.logout{
+  width: 90%;
+  box-sizing: content-box;
+}
+.logout > button{
+  margin-inline: 10px;
+  width: 100%;
+  padding-block: 5px;
+  border: 0px;
+  background-color: wheat;
+  color: #1f2937;
+}

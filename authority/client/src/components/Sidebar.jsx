@@ -40,6 +40,12 @@ function Sidebar(params) {
           </a>
         </li>
       </ul>
+      <div class="logout">
+        <button onClick={()=>{
+           window.localStorage.removeItem("admin");
+           window.location = "/"
+        }}>logout</button>
+      </div>
       {!isCollapsed() && <SendAuth />}
     </div>
   );
