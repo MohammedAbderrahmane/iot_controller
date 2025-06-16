@@ -1,6 +1,6 @@
 const fs = require("fs");
 const coap = require("coap");
-const {glob} = require("glob");
+const { glob } = require("glob");
 
 const AUTHORITIES_PATH = "./auths";
 
@@ -22,84 +22,58 @@ async function getAuthorities(params) {
   return auths;
 }
 
-async function sendCoapRequest(body, fognodeUrl, method, pathname) {
-  const match = fognodeUrl.match(/^coap:\/\/([^:/]+)(?::(\d+))?/);
-
-  const ip = match[1]; // "192.168.1.12"
-  const port = match[2] ? parseInt(match[2]) : 5683; // 5683 if not specified
-
-  return sendCoapRequestAsync(
-    {
-      host: ip,
-      port,
-      method,
-      confirmable: true,
-      pathname,
-    },
-    JSON.stringify(body)
-  );
-}
-
-/**
- * Sends a CoAP request and returns a Promise that resolves with the response
- * or rejects on error/timeout.
- *
- * @param {object} options - Options for coap.request (host, port, method, etc.)
- * @param {Buffer|string} [payload] - Optional payload to send with the request.
- * @returns {Promise<object>} A Promise resolving with the CoAP response object (res).
- */
-function sendCoapRequestAsync(options, payload) {
-  coap.ackTimeout = 1000;
+function fetchCoap(url, timeoutDuration, method, payload) {
   return new Promise((resolve, reject) => {
-    const request = coap.request(options);
+    const urlParts = url.match(/^coap:\/\/([^:/]+)(?::(\d+)(\/.*)?)/);
 
-    // Handle successful response
-    request.on("response", (res) => {
-      // Optional: Automatically read the payload into the response object
-      // CoAP chunks payloads, so we need to accumulate them.
-      let accumulatedPayload = Buffer.alloc(0);
-      res.on("data", (chunk) => {
-        accumulatedPayload = Buffer.concat([accumulatedPayload, chunk]);
-      });
-      res.on("end", () => {
-        res.payload = accumulatedPayload; // Attach accumulated payload to the response object
-        resolve(res); // Resolve the promise with the full response object
-      });
-      res.on("error", (err) => {
-        // Handle errors during response stream reading
-        reject(new Error(`Error reading response stream: ${err.message}`));
-      });
-    });
-
-    // Handle request errors (e.g., network issues)
-    request.on("error", (err) => {
-      reject(new Error(`CoAP request error: ${err.message}`));
-    });
-
-    // Handle request timeout (important for confirmable messages)
-    if (options.confirmable) {
-      request.on("timeout", (err) => {
-        // Note: The 'err' argument might not always be provided by coap.js on timeout
-        reject(
-          new Error(
-            `CoAP request timed out after ${
-              request.options.ackTimeout *
-              request.options.ackRandomFactor *
-              (1 << request.options.retransmit)
-            }s`
-          )
-        );
+    if (!urlParts) {
+      return reject({
+        statusCode: 400,
+        message: "Invalid CoAP URL format provided.",
       });
     }
 
-    // Write payload if provided
+    const params = {
+      host: urlParts[1],
+      port: urlParts[2],
+      pathname: urlParts[3] || "/",
+      method: method || "GET",
+      timeout: timeoutDuration, // Key parameter for timeout handling
+    };
+
+    const req = coap.request(params);
+
+    setTimeout(() => {
+      reject({
+        statusCode: 500, // Internal Server Error
+        message: `An error occurred during the CoAP request: timeout`,
+      });
+    }, timeoutDuration);
+    req.on("response", (res) => {
+      const payloadString = res.payload.toString();
+      resolve(payloadString);
+    });
+
+    req.on("error", (err) => {
+      if (err.code === "ETIMEDOUT") {
+        reject({
+          statusCode: 408, // Request Timeout
+          message: `Request to CoAP endpoint timed out after ${timeoutDuration}ms.`,
+        });
+      } else {
+        reject({
+          statusCode: 500, // Internal Server Error
+          message: `An error occurred during the CoAP request: ${err.message}`,
+        });
+      }
+    });
+
     if (payload) {
-      request.write(payload);
+      req.write(payload);
     }
 
-    // Send the request
-    request.end();
+    req.end();
   });
 }
 
-module.exports = { getAuthorities, sendCoapRequest };
+module.exports = { getAuthorities, fetchCoapJson: fetchCoap };

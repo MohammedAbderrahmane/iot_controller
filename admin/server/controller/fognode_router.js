@@ -3,7 +3,7 @@ const fs = require("fs");
 const crypto = require("crypto");
 const router = express.Router();
 const CRUDFogNode = require("../crud/fognode_crud.js");
-const CRUDIoTObject = require("../crud/iot_object_crud.js");
+const { fetchCoapJson } = require("../utils.js");
 
 const TimeStamp = (date) =>
   `${date.getFullYear()}-${
@@ -21,7 +21,11 @@ router.post("/from-fog", async (request, response) => {
   }
 
   try {
+    console.log("Verefiying th fog node certificate");
     const cert = new crypto.X509Certificate(certificate);
+    console.log("issuer:", cert.issuer);
+    console.log("date of end validtion :", cert.validTo);
+
     const verified = cert.verify(CA_CERTIFICATE.publicKey); // Returns true if valid
     if (!verified) {
       return response.status(401).send("Invalid certificate");
@@ -30,6 +34,7 @@ router.post("/from-fog", async (request, response) => {
     console.log(err);
     return response.status(400).send("Malformed certificate");
   }
+  console.log("certificate validated");
 
   try {
     const fogNodes = await CRUDFogNode.readFogNodes(id);
@@ -101,19 +106,36 @@ router.post("/from-fog", async (request, response) => {
 
 router.get("/", async (request, response) => {
   const fogNodes = await CRUDFogNode.readFogNodes();
+   for (const fogNode of fogNodes) {
+      try {
+        await fetchCoapJson(fogNode.url+"/", 1000)
+        fogNode.online = true
+      } catch (error) {
+        console.log(error);
+      }
+    }
   response.status(200).json(fogNodes);
 });
 
 router.get("/:id", async (request, response) => {
   const { id } = request.params;
   const fogNodes = await CRUDFogNode.readFogNodes(id);
-  const iotObjects = await CRUDIoTObject.readIoTObjects(null, id);
-  response
-    .status(200)
-    .json({
-      ...fogNodes[0],
-      iotObjects: fogNodes.length ? iotObjects : undefined,
-    });
+  var iotObjects;
+
+  try {
+    // Await the result of our promise-based function.
+    iotObjects = JSON.parse(
+      await fetchCoapJson(fogNodes[0].url + "/objects", 3000)
+    );
+  } catch (error) {
+    console.log(error);
+    iotObjects = [];
+  }
+
+  const objects = response.status(200).json({
+    ...fogNodes[0],
+    iotObjects: fogNodes.length ? iotObjects : undefined,
+  });
 });
 
 router.delete("/:id", async (request, response) => {

@@ -80,6 +80,18 @@ function NewObject(params) {
       </p>
       <table>
         <tbody>
+           <tr>
+            <td>
+              <label htmlFor="name"> Id:</label>
+            </td>
+            <td>
+              <input
+                type="text"
+                id="id" // Added id to match label's htmlFor
+                onChange={(e) => console.log("id")}
+              />
+            </td>
+          </tr>
           <tr>
             <td>
               <label htmlFor="name"> Name:</label>
@@ -110,15 +122,15 @@ function NewObject(params) {
           </tr>
           <tr>
             <td>
-            <label for="name"> access policy:</label>
-    </td>
+              <label for="name"> access policy:</label>
+            </td>
             <td>
-            <textarea
-        type="text"
-        onChange={(e) => {
-          setAccessPolicy(e.target.value);
-        }}
-      />
+              <textarea
+                type="text"
+                onChange={(e) => {
+                  setAccessPolicy(e.target.value);
+                }}
+              />
             </td>
           </tr>
         </tbody>
@@ -126,7 +138,7 @@ function NewObject(params) {
 
       <div class="operations-div">
         <button
-        class="search-btn"
+          class="search-btn"
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(" OR ");
@@ -138,7 +150,7 @@ function NewObject(params) {
           OR
         </button>
         <button
-         class="search-btn"
+          class="search-btn"
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(" AND ");
@@ -150,7 +162,7 @@ function NewObject(params) {
           AND
         </button>
         <button
-         class="search-btn"
+          class="search-btn"
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(" ( @ ) ");
@@ -162,12 +174,10 @@ function NewObject(params) {
           ( @ )
         </button>
       </div>
-    
+
       <Show when={attributes.loading}>
         <p>Loading attributes...</p>
       </Show>
-
-
 
       <Show when={attributes.error}>
         <p style={{ color: "red" }}>Error: {attributes.error.message}</p>
@@ -184,7 +194,7 @@ function NewObject(params) {
                   <p>{key} : </p>
                   {value.map((attr, index) => (
                     <button
-                     class="search-btn"
+                      class="search-btn"
                       key={index}
                       onClick={async () => {
                         try {
@@ -193,7 +203,7 @@ function NewObject(params) {
                           console.error("Failed to copy text: ", err);
                         }
                       }}
-                      >
+                    >
                       {attr}
                     </button>
                   ))}
@@ -208,7 +218,7 @@ function NewObject(params) {
   );
 }
 
-function ObjectCard({ index, iot, isUpdating, setIsUpdating }) {
+function ObjectCard({ index, iot, isUpdating, setIsUpdating, nodeId }) {
   const [description, setDescription] = createSignal(iot.description);
   const [accessPolicy, setAccessPolicy] = createSignal(iot.accessPolicy);
   const [status, seStatus] = createSignal({
@@ -217,7 +227,7 @@ function ObjectCard({ index, iot, isUpdating, setIsUpdating }) {
   });
 
   const handleDelete = async (name) => {
-    const result = await deleteIoTObject(name);
+    const result = await deleteIoTObject(name,nodeId);
 
     if (result.ok) {
       seStatus({
@@ -231,7 +241,12 @@ function ObjectCard({ index, iot, isUpdating, setIsUpdating }) {
   };
 
   const handleUpdate = async (name, description, accessPolicy) => {
-    const result = await updateIoTObject(name, description, accessPolicy);
+    const result = await updateIoTObject(
+      name,
+      description,
+      accessPolicy,
+      nodeId
+    );
     if (result.ok) {
       seStatus({
         good: true,
@@ -335,22 +350,23 @@ function FogNodeDiv({ node, refetch }) {
       <h3>List of objects</h3>
 
       <div class="list-objects">
-          {node.iotObjects.length == 0 ? (
-            <div class="fetch-loading">
+        {node.iotObjects.length == 0 ? (
+          <div class="fetch-loading">
             <p class="show-empty-p">There are no objects for this node</p>
-              </div> 
-          ) : (
-            <>
-              {node.iotObjects?.map((iot, index) => (
-                <ObjectCard
-                  iot={iot}
-                  index={index}
-                  isUpdating={isUpdating}
-                  setIsUpdating={setIsUpdating}
-                />
-              ))}
-            </>
-          )}
+          </div>
+        ) : (
+          <>
+            {node.iotObjects?.map((iot, index) => (
+              <ObjectCard
+                nodeId={node.id}
+                iot={iot}
+                index={index}
+                isUpdating={isUpdating}
+                setIsUpdating={setIsUpdating}
+              />
+            ))}
+          </>
+        )}
       </div>
       <NewObject id={node.id} refetch={refetch} />
     </>

@@ -47,7 +47,9 @@ function FogNodeCard({ node, navigate }) {
   return (
     <div class="node-card">
       <h3>{node.name}</h3>
-      <div className="node-online-status" />
+      <div
+        class={!!node.online ? "node-online-status" : "node-offline-status"}
+      />
       <div class="node-info">
         <span>id : </span>
         <span>{node.id}</span>
@@ -59,8 +61,9 @@ function FogNodeCard({ node, navigate }) {
         <span>{new Date(node.date_entering).toLocaleString()}</span>
       </div>
       <button
-        className="btn-config"
+        class="btn-config"
         onClick={() => navigate(`/fognodes/${node.id}`)}
+        disabled={!node.online}
       >
         configure objects
       </button>

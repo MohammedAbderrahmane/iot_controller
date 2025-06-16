@@ -47,20 +47,6 @@ async function initializeDatabase() {
     );
       `);
     console.log("✅ Table 'fognodes' created.");
-    dbConnection.query(`
-    CREATE TABLE IF NOT EXISTS IoTObject (
-      id            VARCHAR(255)      PRIMARY KEY,
-      fog_node      VARCHAR(255)      NOT NULL,
-      name          TEXT              NOT NULL,
-      description   TEXT              NOT NULL,
-      accessPolicy  TEXT              NOT NULL,
-      url           TEXT              NULL,
-      date_creation TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      date_entering   TIMESTAMP         NULL,
-      FOREIGN KEY (fog_node) REFERENCES FogNode(id)
-    );
-      `);
-    console.log("✅ Table 'iot_objects' created.");
 
     dbConnection.on("error", (err) => {
       console.error("MySQL Runtime Error:", err);

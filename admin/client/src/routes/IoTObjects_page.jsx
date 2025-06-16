@@ -103,7 +103,7 @@ function ObjectCard({ index, iot, isUpdating, setIsUpdating }) {
   });
 
   const handleDelete = async (name) => {
-    const result = await deleteIoTObject(name);
+    const result = await deleteIoTObject(name,iot.nodeId);
     if (result.ok) {
       seStatus({
         good: true,
@@ -116,7 +116,7 @@ function ObjectCard({ index, iot, isUpdating, setIsUpdating }) {
   };
 
   const handleUpdate = async (name, description, accessPolicy) => {
-    const result = await updateIoTObject(name, description, accessPolicy);
+    const result = await updateIoTObject(name, description, accessPolicy,iot.nodeId);
     if (result.ok) {
       seStatus({
         good: true,
