@@ -1,14 +1,10 @@
 const express = require("express");
-const router = express.Router();
 const CRUDFogNode = require("../crud/fognode_crud.js");
 const coap = require("coap");
 const util = require("../utils.js");
 const crypto = require("crypto");
 
-const TimeStamp = (date) =>
-  `${date.getFullYear()}-${
-    date.getMonth() + 1
-  }-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+const router = express.Router();
 
 router.get("/", async (request, response) => {
   const fogNodes = await CRUDFogNode.readFogNodes();

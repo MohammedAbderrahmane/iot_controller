@@ -58,17 +58,6 @@ else
   export PATH=$PATH:$GO_INSTALL_DIR/go/bin
   rm go1.24.2.linux-arm64.tar.gz
 
-  LINE='export PATH=$PATH:/usr/local/go/bin'
-  CONFIG_FILE="$HOME/.bashrc"
-  
-  # Check if the line already exists
-  if grep -Fxq "$LINE" "$CONFIG_FILE"; then
-      echo "PATH already updated in $CONFIG_FILE"
-  else
-      echo "$LINE" >> "$CONFIG_FILE"
-      echo "Added Go path to $CONFIG_FILE"
-  fi
-
   go version > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     printf "✅ GoLang installed\n"

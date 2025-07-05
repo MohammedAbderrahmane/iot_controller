@@ -3,13 +3,12 @@ const cors = require("cors");
 const fs = require("fs");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const coap = require("coap");
-const util = require("./utils.js");
 const crypto = require("crypto");
 
 require("dotenv").config();
 const fogNodeRouter = require("./controller/fognode_router.js");
 const iotObjectRouter = require("./controller/iot_object_router.js");
+const AuthorityRouter = require("./controller/authority_router.js");
 const initializeDatabase = require("./mysql-config.js");
 
 const PORT = process.env.PORT;
@@ -48,6 +47,7 @@ app.post("/api/admin/login", async (request, response) => {
 
 app.use("/api/fognodes",fogNodeRouter)
 app.use("/api/objects",iotObjectRouter)
+app.use("/api/auths",AuthorityRouter)
 
 
 app.get("/api/admin/verify", async (request, response) => {
@@ -64,41 +64,6 @@ app.get("/api/admin/verify", async (request, response) => {
       return response.status(401).send({ message: "session expired" });
     return response.status(401).send({ message: "wrong credentials" });
   }
-
-  response.status(200).end();
-});
-
-// ---
-app.get("/api/auths", async (request, response) => {
-  authorities = await util.getAuthorities();
-  response.json(authorities);
-});
-
-app.get("/api/auths/info", async (request, response) => {
-  authorities = await util.getAuthorities();
-  response.json(authorities.map((auth) => ({ ...auth, Pk: undefined })));
-});
-
-app.get("/api/auths/attributes", async (request, response) => {
-  const attributes = {};
-  authorities = await util.getAuthorities();
-  for (const auth of authorities) {
-    attributes[auth["ID"]] = auth.Pk.attributes;
-  }
-  response.json(attributes);
-});
-
-app.post("/api/auths/", async (request, response) => {
-  const { ID, Pk, port } = request.body;
-
-  const newAuth = { ID, Pk, port, host: request.ip.replace("::ffff:", "") };
-
-  fs.writeFileSync(
-    `auths/auth_${ID}_keys.json`,
-    JSON.stringify(newAuth, null, 2)
-  );
-
-  console.log(`\n--- authority ${ID} is registred ---\n`);
 
   response.status(200).end();
 });

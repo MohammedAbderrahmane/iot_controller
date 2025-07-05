@@ -74,7 +74,7 @@ export default function IoTObjectPage(params) {
         <Show when={iotObjects.state == "ready"}>
           {iotObjects().length == 0 ? (
             <div class="fetch-loading">
-              <p>Ther are no objects for this node</p>
+              <p>Ther are no objects in any fog node that is connected</p>
             </div>
           ) : (
             <>

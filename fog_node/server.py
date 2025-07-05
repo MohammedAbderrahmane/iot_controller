@@ -267,7 +267,6 @@ class ObjectRegister(Res.Resource):
 
         token = secrets.token_urlsafe(32)
         from datetime import datetime
-        update_iot_object(object_name,date_enters=datetime.now())
 
         cyphertext = generateCypherText(
             token,

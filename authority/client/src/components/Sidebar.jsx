@@ -46,7 +46,6 @@ function Sidebar(params) {
            window.location = "/"
         }}>logout</button>
       </div>
-      {!isCollapsed() && <SendAuth />}
     </div>
   );
 }

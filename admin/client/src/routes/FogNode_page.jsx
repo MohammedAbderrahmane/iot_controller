@@ -250,7 +250,7 @@ function ObjectCard({ index, iot, isUpdating, setIsUpdating, nodeId }) {
     if (result.ok) {
       seStatus({
         good: true,
-        message: "object deleted successfully",
+        message: "object updated successfully",
       });
       return;
     }
@@ -261,7 +261,7 @@ function ObjectCard({ index, iot, isUpdating, setIsUpdating, nodeId }) {
     <div
       class={
         "object-card " +
-        (!!iot.date_entering ? "iot-connected" : "iot-not-connected")
+        (!!iot.ipAddress ? "iot-connected" : "iot-not-connected")
       }
     >
       <h3>{iot.name}</h3>
@@ -287,12 +287,14 @@ function ObjectCard({ index, iot, isUpdating, setIsUpdating, nodeId }) {
         </div>
         <span>created : </span>
         <span>{new Date(iot.date_creation).toLocaleString()}</span>
-        {iot.date_entering && (
+        {iot.ipAddress && (
           <>
-            <span>url : </span>
-            <span>{iot.url}</span>
+            <span>ip address : </span>
+            <span>{iot.ipAddress}</span>
+            <span>port : </span>
+            <span>{iot.port}</span>
             <span>date de entry : </span>
-            <span>{new Date(iot.date_entering).toLocaleString()}</span>
+            <span>{new Date(iot.date_enters).toLocaleString()}</span>
           </>
         )}
       </div>

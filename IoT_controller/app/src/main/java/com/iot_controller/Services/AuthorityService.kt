@@ -22,8 +22,8 @@ fun retrieveAuthority(
     authorityName: String,
     context: Context,
 ): MaabeKey {
-    val client = OkHttpClient.Builder().connectTimeout(1L, TimeUnit.SECONDS)
-        .readTimeout(1L, TimeUnit.SECONDS).build()
+    val client = OkHttpClient.Builder().connectTimeout(5L, TimeUnit.SECONDS)
+        .readTimeout(10L, TimeUnit.SECONDS).build()
 
     val body = userJson.toString().toRequestBody("application/json".toMediaType())
     val request = Request.Builder().url(url).post(body).build()

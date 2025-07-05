@@ -41,10 +41,10 @@ function LoginPage(params) {
     <div class="login-page">
       <div class="login-image">
         <h2>Welcome to admin dashboard</h2>
-        <img src="smar_dustry_logo_text.png"/> </div>
+        <img src="smar_dustry_logo_text.png" />
+      </div>
 
       <form class="login-form">
-      <h2>Please Enter your credential:</h2>
         <label for="username-input">Username:</label>
         <input
           type="text"

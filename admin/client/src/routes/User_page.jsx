@@ -19,30 +19,26 @@ export default function UsersPage(params) {
 
   return (
     <div class="page">
-      
-        <NewUser refetch={refetch} />
-
+      <NewUser refetch={refetch} />
 
       <h2 class="page-title">list of users</h2>
       <Show when={users.loading}>
         <div class="fetch-loading">
-        <p>Loading users...</p>
-
+          <p>Loading users...</p>
         </div>
       </Show>
 
       <Show when={users.error}>
         <div class="fetch-error">
-
-        <p>Error: {users.error.message}</p>
+          <p>Error: {users.error.message}</p>
         </div>
       </Show>
 
       <Show when={users.state == "ready"}>
         {!users() || users().length == 0 ? (
           <div class="fetch-loading">
-          <p>No users found</p>
-        </div>
+            <p>No users found</p>
+          </div>
         ) : (
           <div class="list-users">
             {users().map((user, index) => {
@@ -57,9 +53,9 @@ export default function UsersPage(params) {
                     <span>created: </span>
                     <span>{new Date(user.date_creation).toLocaleString()}</span>
                   </div>
-                    <span style={{ color: status().good ? "green" : "red" }}>
-                      {status().message}
-                    </span>
+                  <span style={{ color: status().good ? "green" : "red" }}>
+                    {status().message}
+                  </span>
                   <button
                     class="delete-btn"
                     onClick={() => handleRemoveUser(user.username, seStatus)}
@@ -97,10 +93,7 @@ function NewUser(params) {
 
   return (
     <fieldset class="new-user">
-
-        <legend>Create a new user</legend>
-       
-    
+      <legend>Create a new user</legend>
       <p style={{ color: status().good ? "green" : "red" }}>
         {status().message}
       </p>
@@ -136,6 +129,6 @@ function NewUser(params) {
         </tbody>
       </table>
       <button onClick={handleUpload}>add username</button>
-      </fieldset>
+    </fieldset>
   );
 }

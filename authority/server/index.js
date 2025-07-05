@@ -9,15 +9,17 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const initializeDatabase = require("./mysql-config.js");
+const path = require("path")
 
-const MAABE_PUBLIC_PARAMETERS_PATH = "keys/maabe_public_parameters.json";
-const AUTHORITY_PATH = "keys/authority.json";
+const MAABE_PUBLIC_PARAMETERS_PATH = path.join("keys", "maabe_public_parameters.json");
+const AUTHORITY_PATH = path.join("keys", "authority.json");
 const PORT = process.env.PORT || 2000;
 
-const GO_CREATE_AUTHORITY_SCRIPT = "maabe/create_authority";
-const GO_ADD_ATTRIBUTE_SCRIPT = "maabe/add_attribute";
-const GO_RENEW_ATTRIBUTE_SCRIPT = "maabe/renew_attribute";
-const GO_GENERATE_KEYS_SCRIPT = "maabe/generate_keys";
+
+const GO_CREATE_AUTHORITY_SCRIPT = path.join("maabe", "create_authority");
+const GO_ADD_ATTRIBUTE_SCRIPT = path.join("maabe", "add_attribute");
+const GO_RENEW_ATTRIBUTE_SCRIPT = path.join("maabe", "renew_attribute");
+const GO_GENERATE_KEYS_SCRIPT = path.join("maabe", "generate_keys");
 
 var db = null;
 const initDb = async () => (db = await initializeDatabase());

@@ -4,13 +4,34 @@ NODE_MODULES_DIR="node_modules"
 
 cd server
 
-exho "➰ Instlling MAABE scripts"
 cd maabe
-go build -o add_attribute add_attribute.go
-go build -o create_authority create_authority.go
-go build -o generate_keys generate_keys.go
-go build -o renew_attribute renew_attribute.go
-  echo "✅ MAABE scripts insatlled successfully"
+
+compile_if_exists() {
+  local source_file="$1"
+  local output_name="$2"
+
+  if [ -f "$output_name" ]; then
+    echo "✅ '$output_name' arleady compiled. Skipping compilation."
+  else
+    echo "Compiling $source_file..."
+    go build -o "$output_name" "$source_file"
+    if [ $? -eq 0 ]; then
+      echo "  ✅ Successfully compiled $output_name"
+    else
+      echo "❌ Error compiling $source_file. Exiting."
+      exit 1
+    fi
+  fi
+}
+
+echo "➰ Installing MAABE scripts"
+
+compile_if_exists "add_attribute.go" "add_attribute"
+compile_if_exists "create_authority.go" "create_authority"
+compile_if_exists "generate_keys.go" "generate_keys"
+compile_if_exists "renew_attribute.go" "renew_attribute"
+echo "✅ MAABE scripts insatlled successfully"
+echo ""
 cd ..
 
 # Check if the node_modules directory exists

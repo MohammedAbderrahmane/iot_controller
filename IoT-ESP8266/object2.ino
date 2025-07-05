@@ -1,6 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <coap-simple.h>
-#include <WiFiUdp.h>
+#include <WiFiUdp.h>  
 
 const char *WIFI_SSID = "DJAWEB_Med";
 const char *PASSWORD = "SalamFrr";
@@ -11,7 +11,7 @@ const char *PASSWORD = "SalamFrr";
 const long INTERVAL = 1000;
 const IPAddress FOG_NODE_IP_ADDRESS(192, 168, 1, 15);
 const int FOG_NODE_PORT = 5683;
-const char *ID = "object_1";
+const char *ID = "object_2";
 
 WiFiUDP udp;
 Coap coap(udp);
@@ -19,10 +19,7 @@ Coap coap(udp);
 unsigned long previousMillis = 0;
 char *access_token;
 bool ledState = false;
-
-void callback_root(CoapPacket &packet, IPAddress ip, int port);
-void callback_temputature(CoapPacket &packet, IPAddress ip, int port);
-void callback_set_led(CoapPacket &packet, IPAddress ip, int port);
+long led_interval = 1000;
 
 void setup_wifi() {
   WiFi.begin(WIFI_SSID, PASSWORD);
@@ -43,48 +40,66 @@ void setup_wifi() {
 
 void callback_response(CoapPacket &packet, IPAddress ip, int port);
 
+void callback_root(CoapPacket &packet, IPAddress ip, int port);
+void callback_set_speed(CoapPacket &packet, IPAddress ip, int port);
+void callback_get_speed(CoapPacket &packet, IPAddress ip, int port);
 
+void setup_coap_server() {
+  coap.server(callback_root, "");
+  coap.server(callback_get_speed, "get_speed");
+  coap.server(callback_set_speed, "set_speed");
+  Serial.println("--- coap server is setup ---");
+  Serial.println("\t/");
+  Serial.println("\t/set_speed");
+  Serial.println("\t/get_speed");
+  Serial.println("");
+}
 
 void setup_coap_access_token() {
-  Serial.println("Sending request for access token to fog node");
 
-  uint8_t *id_uint8 = (uint8_t *)ID;
-  size_t id_length = strlen(ID);
+  coap.response(callback_response);
 
-  coap.send(
-    FOG_NODE_IP_ADDRESS,
-    FOG_NODE_PORT,
-    "register",
-    COAP_CON,
-    COAP_POST,
-    NULL, 0,
-    id_uint8, id_length);
+  Serial.println("access_token request sent and waiting for response ...");
 }
 
 void setup() {
   pinMode(D4, OUTPUT);
   Serial.begin(9600);
+
+  Serial.print(ID);
+  Serial.println(" is up and running");
+
   setup_wifi();
 
+  setup_coap_access_token();
   setup_coap_server();
-  coap.response(callback_response);
-
   coap.start();
 }
 
 bool requestOnce = true;
 void loop() {
   if (requestOnce) {
-    setup_coap_access_token();
+    uint8_t *id_uint8 = (uint8_t *)ID;
+    size_t id_length = strlen(ID);
+
+    coap.send(
+      FOG_NODE_IP_ADDRESS,
+      FOG_NODE_PORT,
+      "register",
+      COAP_CON,
+      COAP_POST,
+      NULL, 0,
+      id_uint8, id_length);
+
     requestOnce = false;
   }
+  unsigned long currentMillis = millis();
 
-  // unsigned long currentMillis = millis();
-  // if (currentMillis - previousMillis >= INTERVAL) {
-  //   previousMillis = currentMillis;
-  //   ledState = !ledState;
-  //   digitalWrite(D4, ledState);
-  // }
+  if (currentMillis - previousMillis >= led_interval) {
+    previousMillis = currentMillis;
+    ledState = !ledState;
+    digitalWrite(D4, ledState);
+  }
 
   coap.loop();
 }
@@ -92,10 +107,8 @@ void loop() {
 void callback_response(CoapPacket &packet, IPAddress ip, int port) {
   Serial.println("access_token response arrived");
   if (packet.code != COAP_CREATED) {
-    char *error_message = strdup((char *)packet.payload);
-    error_message[packet.payloadlen] = '\0';
-    Serial.print("Failed to retreaive token : ");
-    Serial.println(error_message);
+    Serial.print("response with wrong type : ");
+    Serial.println(packet.code);
     return;
   }
 
@@ -103,18 +116,6 @@ void callback_response(CoapPacket &packet, IPAddress ip, int port) {
   access_token[packet.payloadlen] = '\0';
   Serial.print("access_token : ");
   Serial.println(access_token);
-}
-
-
-void setup_coap_server() {
-  coap.server(callback_root, "");
-  coap.server(callback_temperature, "temperature");
-  coap.server(callback_set_led, "set_led");
-  Serial.println("--- coap server is setup ---");
-  Serial.println("");
-  Serial.println("\t/temperature");
-  Serial.println("\t/set_led");
-  Serial.println("");
 }
 
 void callback_root(CoapPacket &packet, IPAddress ip, int port) {
@@ -187,8 +188,8 @@ void callback_root(CoapPacket &packet, IPAddress ip, int port) {
   Serial.println(ip);
 }
 
-void callback_temperature(CoapPacket &packet, IPAddress ip, int port) {
-  Serial.print("/temperature : request from : ");
+void callback_get_speed(CoapPacket &packet, IPAddress ip, int port) {
+  Serial.print("/get_speed : request from : ");
   Serial.print(ip);
   Serial.print(" port :");
   Serial.println(port);
@@ -243,9 +244,8 @@ void callback_temperature(CoapPacket &packet, IPAddress ip, int port) {
     return;
   }
 
-  long temperature = random(0, 100);
   char response_payload[16];
-  sprintf(response_payload, "%ld", temperature);
+  sprintf(response_payload, "%ld", led_interval);
   coap.sendResponse(
     ip,
     port,
@@ -259,8 +259,8 @@ void callback_temperature(CoapPacket &packet, IPAddress ip, int port) {
   Serial.println(ip);
 }
 
-void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
-  Serial.print("/set_led : request from : ");
+void callback_set_speed(CoapPacket &packet, IPAddress ip, int port) {
+  Serial.print("/set_speed : request from : ");
   Serial.print(ip);
   Serial.print(" port :");
   Serial.println(port);
@@ -314,15 +314,13 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
       packet.token, packet.tokenlen);
     return;
   }
-  const char *led_state = (char *)(payload_string + strlen(access_token));
-  Serial.print("received led state : ");
-  Serial.println(led_state);
+  const char *new_interval_str = (char *)(payload_string + strlen(access_token));
+  Serial.print("received new interval : ");
+  Serial.println(new_interval_str);
 
-  if (strcmp(led_state, "ON") == 0) {
-    digitalWrite(D4, HIGH);
-  } else if (strcmp(led_state, "OFF") == 0) {
-    digitalWrite(D4, LOW);
-  } else {
+char *endptr; 
+  led_interval = strtol(new_interval_str, &endptr, 10);
+  if (*endptr != '\0') {
     const char *response_payload = "Incorect request";
     coap.sendResponse(
       ip,
@@ -335,7 +333,6 @@ void callback_set_led(CoapPacket &packet, IPAddress ip, int port) {
       packet.token, packet.tokenlen);
     return;
   }
-
 
   const char *response_payload = "OK";
   coap.sendResponse(
