@@ -1,42 +1,47 @@
-# Maabe Authority Web Application
+# MA-ABE IoT access control system
 
-web application built with [SolidJS](https://www.solidjs.com/), it aims to provide an interface for authorities to manges attributes and users.
+## Admin web application
 
-## 🚀 Features
+- install **node.js** and **mysql**,
 
-- import MAABE public parameters (it must be generated using the maabe.go script of the project)
-- create new authority or import a exesting one
-- create new attributes
-- creaet new users (username,passwords) and assiate attributes to them
-- see exesting users with their attributes
-- generte keys for users when they interacte with API (need authentication)
-
-## 📦 Running
-
-
-Make sure you have **Node.js** , **npm** , **mysql** installed on your machine.
-
-copy the this into your .env variable file : `iot_controller/authority/server/.env`
-```yaml
-DB_HOST     =localhost
-DB_USER     =your_admin
-DB_PASSWORD =your_password
-DB_NAME     =your_db
+- setup the ".env"
 ```
-run the `iot_controller/authority/server/.db` file on mysql to create the nessessery tables
-```bash
-mysql -u your_username -p your_database_name < iot_controller/authority/server/.db
+
+DB_HOST=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+
+JWT_SECRET=
+PORT=
 ```
-now run the server
-```bash
-cd iot_controller/authority/server
-npm install
-npm run dev / npm start
+
+- start ./launch.sh
+
+## Authority
+
+- install **node.js** , **goLang** and **mysql**
+
+- setup the .env
+
 ```
-now the ui : 
-```bash
-cd iot_controller/authority/client
-npm install
-npm run dev
+DB_HOST=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+
+JWT_SECRET=
+
+PORT=
+SERVER_URL="the admin server"
 ```
-default admin login credentials : admin/0000
+
+- start ./launch.sh
+
+## fog node
+
+- install **python3**, **pip**, **goLang**  and **mariadb**
+
+- start ./install.sh and setup
+
+- python3 server.py
